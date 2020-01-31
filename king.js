@@ -1,37 +1,43 @@
 const tmi = require('tmi.js');
 const info = require('./JSON/info.json')
-const chat = require('./helpers/chat.js')
+const chatHelper = require('./helpers/chat.js')
 
 const prefix = '!';
 
 // Define configuration options
 const opts = {
-  identity: {
-    username: info.username,
-    password: info.token
-  },
-  channels: [
-    info.channel
-  ]
+	options: {
+		debug: true,
+	},
+	identity: {
+		username: info.username,
+		password: info.token
+	},
+	channels: [
+		info.channel
+	]
 };
 // Create a client with our options
 const client = new tmi.client(opts);
 
-// Register our event handlers (defined below)
-client.on('message', onMessageHandler);
-client.on('connected', onConnectedHandler);
+
 
 // Connect to Twitch:
 client.connect();
 
-// Called every time a message comes in
-function onMessageHandler (target, context, msg, self) {
-    if (self) { return; } // Ignore messages from the bot
+client.on('connected', (address, port) => {
+	console.log("Connected to channel")
+});
 
-    // Only respond to the prefix with something after the message
-    if (!msg.startsWith(prefix) && msg.length > 1) {
-	    return;
-    }
+// Called every time a message comes in
+client.on('chat', (channel, user, message, self) => {
+	if (self) { return; } // Ignore messages from the bot
+
+	// Only respond to the prefix with something after the message
+	if (!message.startsWith(prefix) && message.length > 1) {
+		return;
+	}
+
 	/*
 	 * 1) Strip the ! prefix from the message
 	 * 2) Clean extra whitespaces
@@ -39,21 +45,20 @@ function onMessageHandler (target, context, msg, self) {
 	 * 4) Take the first word
 	 * 5) Convert to lowercase and assign as command
 	 */
-	words = msg
-			.substr(1, msg.length)
-			.replace(/\s+/g, " ")
-			.split(' ');
+	words = message
+		.substr(1, message.length)
+		.replace(/\s+/g, " ")
+		.split(' ');
 	
-    command = words[0].toLowerCase();
-    
-    switch(command) {
-        case "dice":
- 
-            client.say(target, `You rolled a ` + chat.rollDice());
-    }
-}
+	command = words[0].toLowerCase();
 
-// Called every time the bot connects to Twitch chat
-function onConnectedHandler (addr, port) {
-  console.log(`* Connected to ${addr}:${port}`);
-}
+	switch(command) {
+		case "ping":
+			client.say(channel, `Pong!`);
+			break;
+
+		case "dice":
+			client.say(channel, user['display-name'] + `: You rolled a ` + chatHelper.rollDice());
+			break;
+	}
+});
