@@ -8,8 +8,9 @@ module.exports = {
 	},
 
 	timerWords: function(parameter) {
-		if (parameter == "follow") {
-			return "Want to see more content? Hit that follow button!";
+		switch (parameter) {
+			case "follow":
+				return "Want to see more content? Hit that follow button!";
 		}
 	}
 }
