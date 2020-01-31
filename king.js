@@ -60,5 +60,16 @@ client.on('chat', (channel, user, message, self) => {
 		case "dice":
 			client.say(channel, user['display-name'] + `: You rolled a ` + chatHelper.rollDice());
 			break;
+
+		case "timer":
+			if (words[1] == "start") {
+				followTimer = setInterval(function(){ client.say(channel, chatHelper.timerWords("follow")) }, 1000);
+			}
+			if (words[1] == "stop") {
+				if (words[2] == "follow") {
+					clearInterval(followTimer);
+				}
+			}
+			break;
 	}
 });
