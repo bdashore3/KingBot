@@ -3,6 +3,7 @@ const info = require('./JSON/info.json')
 const chatHelper = require('./helpers/chat.js')
 
 const prefix = '!';
+const briUsername = 'kingbrigames'
 
 // Define configuration options
 const opts = {
@@ -20,10 +21,17 @@ const opts = {
 // Create a client with our options
 const client = new tmi.client(opts);
 
-
-
 // Connect to Twitch:
 client.connect();
+
+function isAdmin(name) {
+	return (isDev(name))
+}
+
+// Do NOT edit this.
+function isDev(name) {
+	return (name == briUsername);
+}
 
 client.on('connected', (address, port) => {
 	console.log("Connected to channel")
@@ -62,6 +70,10 @@ client.on('chat', (channel, user, message, self) => {
 			break;
 
 		case "timer":
+			if (!isAdmin(user['username'])) {
+				client.action(channel, "You can't execute this command!")
+				break;
+			}
 			chatHelper.timer(client, channel, words[1], words[2], Number(words[3]))
 			break;
 	}
