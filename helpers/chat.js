@@ -1,5 +1,7 @@
 const fs = require('fs')
 
+var timerList = {};
+
 module.exports = {
 	// Function called when the "dice" command is issued
 	rollDice: function () {
@@ -11,6 +13,15 @@ module.exports = {
 		switch (parameter) {
 			case "follow":
 				return "Want to see more content? Hit that follow button!";
+		}
+	},
+
+	timer: function(client, channel, parameter, type, ms) {
+		if (parameter == "start") {
+			timerList[type] = setInterval(function(){ client.say(channel, module.exports.timerWords(type)) }, ms);
+		}
+		if (parameter == "stop") {
+			clearInterval(timerList[type]);
 		}
 	}
 }
