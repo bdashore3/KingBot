@@ -98,6 +98,10 @@ client.on('chat', (channel, user, message, self) => {
 			break;
 		
 		case "addtimermessage":
+			if (!isAdmin(user['username'])) {
+				client.action(channel, "You can't execute this command!")
+				break;
+			}
 			index = words[1]
 			words.splice(0, 2)
 			chatHelper.addTimerMessage(index, words.join(" "))
