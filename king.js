@@ -5,6 +5,8 @@ const chatHelper = require('./helpers/chat.js')
 const prefix = '!';
 const briUsername = 'kingbrigames'
 
+timerList = {} //Blank object for storing our custom timer variables
+
 // Define configuration options
 const opts = {
 	options: {
@@ -34,6 +36,7 @@ function isDev(name) {
 }
 
 client.on('connected', (address, port) => {
+	chatHelper.updateTimerWords();
 	console.log("Connected to channel")
 });
 
@@ -74,7 +77,30 @@ client.on('chat', (channel, user, message, self) => {
 				client.action(channel, "You can't execute this command!")
 				break;
 			}
-			chatHelper.timer(client, channel, words[1], words[2], Number(words[3]))
+			switch(words[1]) {
+			case "start":
+				result = chatHelper.returnTimerWords(words[2])
+				if (result == false || words[3] == undefined) {
+					console.log("Check your syntax!")
+					console.log("Syntax: !timer start *index* *time in ms*")
+					break;
+				}
+				timerList[words[2]] = setInterval(function(){ client.say(channel, result) }, Number(words[3]));
+				break;
+			case "stop":
+				clearInterval(timerList[words[2]]);
+				break;
+			case "write":
+				chatHelper.write();
+				console.log("Timer messages written successfully!")
+				break;
+			}
+			break;
+		
+		case "addtimermessage":
+			index = words[1]
+			words.splice(0, 2)
+			chatHelper.addTimerMessage(index, words.join(" "))
 			break;
 	}
 });

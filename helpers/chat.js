@@ -1,27 +1,42 @@
 const fs = require('fs')
+const jsonPath = "./JSON/";
 
-var timerList = {};
+var timerWords = {};
+
+/* 
+ * Simple function for writing so that I don't have to keep entering the same command
+ */
+function writeInternal() {
+	fs.writeFileSync(jsonPath + 'timerWords.json', JSON.stringify(timerWords, null, 4));
+	return "Timer Messages Successfully written";
+}
 
 module.exports = {
+
+	write: function() {
+		writeInternal();
+	},
+
 	// Function called when the "dice" command is issued
 	rollDice: function () {
 		const sides = 6;
 		return Math.floor(Math.random() * sides) + 1;
 	},
 
-	timerWords: function(parameter) {
-		switch (parameter) {
-			case "follow":
-				return "Want to see more content? Hit that follow button!";
-		}
+	updateTimerWords: function() {
+		timerWords = JSON.parse(fs.readFileSync(jsonPath + 'timerWords.json'));
 	},
 
-	timer: function(client, channel, parameter, type, ms) {
-		if (parameter == "start") {
-			timerList[type] = setInterval(function(){ client.say(channel, module.exports.timerWords(type)) }, ms);
+	returnTimerWords: function(index) {
+		if (index == undefined) {
+			return false;
 		}
-		if (parameter == "stop") {
-			clearInterval(timerList[type]);
+		return timerWords[index].message;
+	},
+
+	addTimerMessage: function(index, message) {
+		timerWords[index] = {
+			message: message
 		}
 	}
 }
