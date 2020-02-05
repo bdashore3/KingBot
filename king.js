@@ -1,27 +1,8 @@
-const tmi = require('tmi.js');
-const info = require('./JSON/info.json')
+const client = require('./client.js')
 const chatHelper = require('./helpers/chat.js')
 
 const prefix = '!';
 const briUsername = 'kingbrigames'
-
-timerList = {} //Blank object for storing our custom timer variables
-
-// Define configuration options
-const opts = {
-	options: {
-		debug: true,
-	},
-	identity: {
-		username: info.username,
-		password: info.token
-	},
-	channels: [
-		info.channel
-	]
-};
-// Create a client with our options
-const client = new tmi.client(opts);
 
 // Connect to Twitch:
 client.connect();
@@ -77,24 +58,7 @@ client.on('chat', (channel, user, message, self) => {
 				client.action(channel, "You can't execute this command!")
 				break;
 			}
-			switch(words[1]) {
-			case "start":
-				result = chatHelper.returnTimerWords(words[2])
-				if (result == false || words[3] == undefined) {
-					console.log("Check your syntax!")
-					console.log("Syntax: !timer start *index* *time in ms*")
-					break;
-				}
-				timerList[words[2]] = setInterval(function(){ client.say(channel, result) }, Number(words[3]));
-				break;
-			case "stop":
-				clearInterval(timerList[words[2]]);
-				break;
-			case "write":
-				chatHelper.write();
-				console.log("Timer messages written successfully!")
-				break;
-			}
+			chatHelper.timer(channel, words[1], words[2], words[3])
 			break;
 		
 		case "addtimermessage":
@@ -103,7 +67,7 @@ client.on('chat', (channel, user, message, self) => {
 				break;
 			}
 			index = words[1]
-			words.splice(0, 2)
+			words.splice(0, 2);
 			chatHelper.addTimerMessage(index, words.join(" "))
 			break;
 	}
