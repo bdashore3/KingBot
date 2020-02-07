@@ -1,5 +1,6 @@
-const client = require('./client.js')
+const client = require('./botClient.js')
 const chatHelper = require('./helpers/chat.js')
+const info = require('./JSON/info.json')
 
 const prefix = '!';
 const briUsername = 'kingbrigames'
@@ -45,6 +46,14 @@ client.on('chat', (channel, user, message, self) => {
 	command = words[0].toLowerCase();
 
 	switch(command) {
+		case "checklive":
+			if (!chatHelper.isStreamLive(info.channel)) {
+				client.say("Stream is not live...")
+			} else {
+				client.say("The stream IS live according to twitch API")
+			}
+			break;
+
 		case "ping":
 			client.say(channel, `Pong!`);
 			break;

@@ -1,6 +1,7 @@
 const fs = require('fs')
 const jsonPath = "./JSON/";
-const client = require('.././client.js')
+const client = require('.././botClient.js')
+const apiClient = require('.././apiClient.js')
 
 var timerWords = {};
 var timerList = {};
@@ -11,6 +12,14 @@ var timerList = {};
 function writeInternal() {
 	fs.writeFileSync(jsonPath + 'timerWords.json', JSON.stringify(timerWords, null, 4));
 	return "Timer Messages Successfully written";
+}
+
+async function isStreamLiveInternal(userName) {
+	const user = await apiClient.helix.users.getUserByName(userName);
+	if (!user) {
+		return false;
+	}
+	return await user.getStream() !== null;
 }
 
 module.exports = {
@@ -60,5 +69,11 @@ module.exports = {
 		timerWords[index] = {
 			message: message
 		}
+	},
+
+	isStreamLive: function(userName) {
+		isStreamLiveInternal(userName).then(function(result) {
+			return result;
+		}) 
 	}
 }
