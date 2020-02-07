@@ -1,9 +1,12 @@
 const client = require('./botClient.js')
+const apiClient = require('./apiClient.js')
 const chatHelper = require('./helpers/chat.js')
+const WebHookListener = require('twitch-webhooks').default;
 const info = require('./JSON/info.json')
 
 const prefix = '!';
 const briUsername = 'kingbrigames'
+const userId = info.userID
 
 // Connect to Twitch:
 client.connect();
@@ -16,6 +19,31 @@ function isAdmin(name) {
 function isDev(name) {
 	return (name == briUsername);
 }
+
+const listenerInit = async () => {
+	const listener = await WebHookListener.create(apiClient, {
+			hostName: "**Ngrok url**.ngrok.io",
+			port: 8090,
+			reverseProxy: { port: 443, ssl: true }
+		});
+	listener.listen();
+	return subscription(listener);
+}
+
+const subscription = async (listener) => { 
+	return await listener.subscribeToStreamChanges(userId, async (stream) => {
+		if (stream) {
+			console.log(`${stream.userDisplayName} just went live with title: ${stream.title}`);
+		} else {
+			// no stream, no display name
+			const user = await twitchClient.helix.users.getUserById(userId);
+			console.log(`${user.displayName} just went offline`);
+		}
+	});
+}
+
+listenerInit().then(res => { })
+	.catch((err) => console.log("listenerErr: ", err))
 
 client.on('connected', (address, port) => {
 	chatHelper.updateTimerWords();
