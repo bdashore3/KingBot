@@ -4,9 +4,9 @@ const chatHelper = require('./helpers/chat.js')
 const WebHookListener = require('twitch-webhooks').default;
 const info = require('./JSON/info.json')
 
-const prefix = '?'; // Whatever the prefix is. NOTE: streamlabs uses !
-const briUsername = 'kingbrigames' // My username: Used for dev check
-const userId = info.userID
+const prefix = '?'; // Whatever the prefix is. NOTE: streamlabs uses prefix: !
+const briUsername = 'kingbrigames' // My username: Used for dev check, will be a parameter in info.json soon.
+const userId = info.userID // User's ID for webhooks. Required in string format otherwise 400 error will fire.
 
 // Connect to Twitch:
 client.connect();
@@ -29,21 +29,29 @@ function isDev(name) {
  */
 const listenerInit = async () => {
 	const listener = await WebHookListener.create(apiClient, {
-			hostName: "**Ngrok url**.ngrok.io",
-			port: 8090,
-			reverseProxy: { port: 443, ssl: true }
+			port: 8090
 		});
 	listener.listen();
 	return subscription(listener);
 }
 
-const subscription = async (listener) => { 
+/*
+ * Subscribes to the listener
+ * If x happens, then the code below is executed and returned to the bot
+ * This webhook is better than API polling because it only turns on when needed to instead
+ * of constantly sending a request through the API.
+ * The first comment is a testing return statment where we check for followers instead of
+ * if the user is live.
+ */
+
+const subscription = async (listener) => {
+	//return await listener.subscribeToFollowsToUser(userId, follow => console.log(follow))
 	return await listener.subscribeToStreamChanges(userId, async (stream) => {
 		if (stream) {
 			console.log(`${stream.userDisplayName} just went live with title: ${stream.title}`);
 		} else {
 			// no stream, no display name
-			const user = await twitchClient.helix.users.getUserById(userId);
+			const user = await apiClient.helix.users.getUserById(userId);
 			console.log(`${user.displayName} just went offline`);
 		}
 	});
@@ -79,17 +87,13 @@ client.on('chat', (channel, user, message, self) => {
 		.substr(1, message.length)
 		.replace(/\s+/g, " ")
 		.split(' ');
-	
+
 	command = words[0].toLowerCase();
 
 	switch(command) {
-		// Check if the API says if the current channel is live!
+		// Check if the API says if the current channel is live! (Logs in console!)
 		case "checklive":
-			if (!chatHelper.isStreamLive(info.channel)) {
-				client.say("Stream is not live...")
-			} else {
-				client.say("The stream IS live according to twitch API")
-			}
+			chatHelper.isStreamLive(info.channel)
 			break;
 
 		// PONG
@@ -110,7 +114,7 @@ client.on('chat', (channel, user, message, self) => {
 			}
 			chatHelper.timer(channel, words[1], words[2], words[3])
 			break;
-		
+
 		// Adds message for timer. Will be combined with timer
 		case "addtimermessage":
 			if (!isAdmin(user['username'])) {

@@ -7,7 +7,7 @@ var timerWords = {};
 var timerList = {};
 var quotes = {};
 
-/* 
+/*
  * One function to write to file x based on parameter entered.
  */
 function writeInternal(parameter) {
@@ -62,7 +62,7 @@ module.exports = {
 	},
 
 	/*
-	 * Backend for messages sent over a certain interval. 
+	 * Backend for messages sent over a certain interval.
 	 * If one parameter is missing or malformed, the bot will return an error to the user
 	 * In the start case, the timer is started over the configured milliseconds
 	 * Fetches the message from the timerWords object and sets an interval
@@ -71,7 +71,7 @@ module.exports = {
 	 */
 	timer: function(channel, command, index, ms) {
 		switch(command) {
-			case "start": 
+			case "start":
 				if (this.returnTimerWords(words[2]) == false || ms == undefined) {
 					console.log("Check your syntax!")
 					console.log("Syntax: !timer start *index* *time in ms*")
@@ -101,8 +101,8 @@ module.exports = {
 	// module export for isStreamLiveInternal.
 	isStreamLive: function(userName) {
 		isStreamLiveInternal(userName).then(function(result) {
-			return result;
-		}) 
+			console.log(result);
+		})
 	},
 
 	/*
@@ -110,11 +110,11 @@ module.exports = {
 	 * Has 4 cases: add, remove, retrieve, and write
 	 * add: User can add a quote to the quotes object under a number (index)
 	 * remove: remove said quote from that index. Only admins can execute this!
-	 * retrieve: Takes the quote from the object and returns it 
-	 * 	to be said in the twitch chat
+	 * retrieve: Takes the quote from the object and returns it
+	 * 	     to be said in the twitch chat
 	 * write: Writes quotes object to JSON file. Only admins can execute this!
-	 * 
-	 * TODO: Add ability to list all quotes in a user's DMs
+	 *
+	 * TODO: Add ability to list all quotes in a user's DMs (Requires known bot permission.)
 	 */
 	quote: function(command, index, newMessage) {
 		switch(command) {
@@ -129,7 +129,7 @@ module.exports = {
 				break;
 
 			case "retrieve":
-				return quotes[index].message;	
+				return quotes[index].message;
 
 			case "write":
 				writeInternal("quotes");
