@@ -5,8 +5,8 @@ const WebHookListener = require('twitch-webhooks').default;
 const info = require('./JSON/info.json')
 
 const prefix = '?'; // Whatever the prefix is. NOTE: streamlabs uses prefix: !
-const briUsername = 'kingbrigames' // My username: Used for dev check, will be a parameter in info.json soon.
-const userId = info.userID // User's ID for webhooks. Required in string format otherwise 400 error will fire.
+const briUsername = 'kingbrigames' // My username: DO NOT EDIT THIS.
+const userId = info.userID // User's ID for webhooks. Required in string format otherwise 400 error will fire (The JSON file handles it for you).
 
 // Connect to Twitch:
 client.connect();

@@ -1,0 +1,8 @@
+{
+    "username" : "BOT USERNAME",
+    "token" : "OAuth TOKEN",
+    "channel" : "CHANNEL YOU WANT THIS BOT TO FUNCTION IN",
+	"userID" : "YOUR USERID (string of numbers) Find it from the chrome extension Twitch Username and ID Translator",
+	"apiId" : "Create a new API application and get the ID from there",
+	"apiSecret" : "See above and get the secret"
+}
