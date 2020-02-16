@@ -3,6 +3,7 @@ const apiClient = require('./apiClient.js')
 const chatHelper = require('./helpers/chat.js')
 const WebHookListener = require('twitch-webhooks').default;
 const info = require('./JSON/info.json')
+const custom = require('./JSON/custom.json')
 
 const prefix = '?'; // Whatever the prefix is. NOTE: streamlabs uses prefix: !
 const briUsername = 'kingbrigames' // My username: DO NOT EDIT THIS.
@@ -14,7 +15,7 @@ client.connect();
 
 // Checks if the user is an admin aka a mod.
 function isAdmin(name) {
-	return (isDev(name))
+	return (isDev(name) || 'regalbot1')
 }
 
 // Do NOT edit this.
@@ -62,8 +63,9 @@ listenerInit().then(res => { })
 
 // On connection, update all json files
 client.on('connected', (address, port) => {
-	chatHelper.updateTimerWords();
-	chatHelper.updateQuotes();
+	chatHelper.read("timerWords");
+	chatHelper.read("quotes");
+	chatHelper.read("custom");
 	console.log("Connected to channel")
 });
 
@@ -141,7 +143,7 @@ client.on('chat', (channel, user, message, self) => {
 			else if (words[1] == "add") {
 				index = words[2]
 				words.splice(0, 3);
-				if (chatHelper.ensureQuote(index)) {
+				if (chatHelper.ensurePhrase(index, "quotes")) {
 					client.say(channel, "This number is taken!")
 					break;
 				}
@@ -154,5 +156,34 @@ client.on('chat', (channel, user, message, self) => {
 			}
 			client.say(channel, out);
 			break;
+		
+		// Frontend for writing commands Admins only!
+		case "command":
+			if (!isAdmin(user['username'])) {
+				client.action(channel, "You can't execute this command!")
+				break;
+			}
+				
+			instruction = words[1];
+			name = words[2];
+			if (instruction == "add") {
+				if (chatHelper.ensurePhrase(name, "custom")) {
+					client.say(channel, "This command already exists")
+					break;
+				}
+			}
+			words.splice(0, 3);
+			chatHelper.customCommand(instruction, name, words.join(" "));
+
+		// Whisper stuff to yourself!
+		case "whisper":
+			client.whisper(user['username'], words[1])
+			break;
 	}
+	
+	// If the command doesn't exist, check if in custom command object.
+	if (chatHelper.custom[command]) {
+		client.say(channel, chatHelper.custom[command].message);
+	}
+	
 });

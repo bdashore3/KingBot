@@ -3,25 +3,23 @@ const jsonPath = "./JSON/";
 const client = require('.././botClient.js')
 const apiClient = require('.././apiClient.js')
 
-var timerWords = {};
-var timerList = {};
-var quotes = {};
+const allObjects = {
+	timerList: {},
+	timerWords: {},
+	quotes: {},
+	custom: {}
+}
 
 /*
  * One function to write to file x based on parameter entered.
  */
-function writeInternal(parameter) {
-	if (parameter == "timerWords") {
-		fs.writeFileSync(jsonPath + 'timerWords.json', JSON.stringify(timerWords, null, 4));
-		return "Timer Messages Successfully written";
-	}
-	if (parameter == "quotes") {
-		fs.writeFileSync(jsonPath + 'quotes.json', JSON.stringify(quotes, null, 4));
-		return "quotes successfully written"
-	}
+function writeInternal(name) {
+	return fs.promises.writeFile(`${jsonPath}${name}.json`, JSON.stringify(allObjects[name], null, 4));
 }
 
-
+function readInternal(name) {
+	allObjects[name] = JSON.parse(fs.readFileSync(`${jsonPath}${name}.json`));
+}
 // Checks if the stream is live from the twitch api
 async function isStreamLiveInternal(userName) {
 	const user = await apiClient.helix.users.getUserByName(userName);
@@ -32,9 +30,17 @@ async function isStreamLiveInternal(userName) {
 }
 
 module.exports = {
+	get custom() {
+		return allObjects.custom;
+	},
+
 	// calls writeInternal
-	write: function(parameter) {
-		writeInternal(parameter);
+	write: function(name) {
+		writeInternal(name);
+	},
+
+	read: function(name) {
+		readInternal(name);
 	},
 
 	// Function called when the "dice" command is issued
@@ -43,22 +49,12 @@ module.exports = {
 		return Math.floor(Math.random() * sides) + 1;
 	},
 
-	// Updates timerwords object. Will be made into a universal function
-	updateTimerWords: function() {
-		timerWords = JSON.parse(fs.readFileSync(jsonPath + 'timerWords.json'));
-	},
-
-	// See above.
-	updateQuotes: function() {
-		quotes = JSON.parse(fs.readFileSync(jsonPath + 'quotes.json'))
-	},
-
 	// Returns if timerword exists
 	returnTimerWords: function(index) {
 		if (index == undefined) {
 			return false;
 		}
-		return timerWords[index].message;
+		return allObjects.timerWords[index].message;
 	},
 
 	/*
@@ -72,15 +68,15 @@ module.exports = {
 	timer: function(channel, command, index, ms) {
 		switch(command) {
 			case "start":
-				if (this.returnTimerWords(words[2]) == false || ms == undefined) {
+				if (this.returnTimerWords(index) == false || ms == undefined) {
 					console.log("Check your syntax!")
 					console.log("Syntax: !timer start *index* *time in ms*")
 					break;
 				}
-				timerList[words[2]] = setInterval(function(){ client.say(channel, timerWords[index].message) }, Number(ms));
+				allObjects.timerList[index] = setInterval(function(){ client.say(channel, allObjects.timerWords[index].message) }, Number(ms));
 				break;
 			case "stop":
-				clearInterval(timerList[index]);
+				clearInterval(allObjects.timerList[index]);
 				break;
 			case "write":
 				writeInternal("timerWords");
@@ -93,7 +89,7 @@ module.exports = {
 	 * Seperate function for adding timer messages. Will be combined with timer in future release.
 	 */
 	addTimerMessage: function(index, message) {
-		timerWords[index] = {
+		allObjects.timerWords[index] = {
 			message: message
 		}
 	},
@@ -111,7 +107,7 @@ module.exports = {
 	 * add: User can add a quote to the quotes object under a number (index)
 	 * remove: remove said quote from that index. Only admins can execute this!
 	 * retrieve: Takes the quote from the object and returns it
-	 * 	     to be said in the twitch chat
+	 *     to be said in the twitch chat
 	 * write: Writes quotes object to JSON file. Only admins can execute this!
 	 *
 	 * TODO: Add ability to list all quotes in a user's DMs (Requires known bot permission.)
@@ -119,17 +115,17 @@ module.exports = {
 	quote: function(command, index, newMessage) {
 		switch(command) {
 			case "add":
-				quotes[index] = {
+				allObjects.quotes[index] = {
 					message: newMessage
 				}
 				break;
 
 			case "remove":
-				delete quotes[index]
+				delete allObjects.quotes[index]
 				break;
 
 			case "retrieve":
-				return quotes[index].message;
+				return allObjects.quotes[index].message;
 
 			case "write":
 				writeInternal("quotes");
@@ -138,10 +134,43 @@ module.exports = {
 		}
 	},
 
-	// Makes sure the quote is in the json file. If it's there, return true.
-	ensureQuote: function(index) {
-		if (quotes.hasOwnProperty(index)) {
+	/*
+	 * Makes sure the phrase exists in the corresponding object
+	 * Basic idiotproofing function so stuff isn't overwitten
+	 * Still uses classic index format.
+	 */
+	ensurePhrase: function(index, parameter) {
+		if (allObjects[parameter].hasOwnProperty(index))
 			return true;
+	},
+
+	/*
+	 * Backend for custom commands
+	 * Has 3 cases: add, remove, and write
+	 * Add: adds a new command based on the name and the message
+	 * Remove: gets rid of the added command
+	 * Write: Writes commands object to JSON
+	 * 
+	 * Add has an ensurePhrase check. See the ensurePhrase docs.
+	 * 
+	 * TODO: List by whisper
+	 */
+	customCommand: function(instruction, name, words) {
+		switch(instruction) {
+			case "add":
+				allObjects.custom[name] = {
+					message: words
+				}
+				break;
+
+			case "remove":
+				delete allObjects.custom[name]
+				break;
+			
+			case "write":
+				writeInternal("custom");
+				console.log("Custom Command successfully written!")
+				break;
 		}
 	}
 }
