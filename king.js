@@ -160,14 +160,14 @@ client.on('chat', (channel, user, message, self) => {
 			}
 			client.say(channel, out);
 			break;
-		
+
 		// Frontend for writing commands Admins only!
 		case "command":
 			if (!isAdmin(user['username'])) {
 				client.action(channel, "You can't execute this command!")
 				break;
 			}
-				
+
 			instruction = words[1];
 			name = words[2];
 			if (instruction == "add") {
@@ -178,16 +178,17 @@ client.on('chat', (channel, user, message, self) => {
 			}
 			words.splice(0, 3);
 			chatHelper.customCommand(instruction, name, words.join(" "));
+			break;
 
 		// Whisper stuff to yourself!
 		case "whisper":
 			client.whisper(user['username'], words[1])
 			break;
 	}
-	
+
 	// If the command doesn't exist, check if in custom command object.
 	if (chatHelper.custom[command]) {
 		client.say(channel, chatHelper.custom[command].message);
 	}
-	
+
 });
