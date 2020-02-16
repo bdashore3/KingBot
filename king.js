@@ -154,6 +154,13 @@ client.on('chat', (channel, user, message, self) => {
 				chatHelper.quote("add", index, words.join(" "))
 				break;
 			}
+			else if (words[1] == "log") {
+				client.whisper(user['username'], "Quotes List (Get the quote by ?quote retrieve #)")
+				client.whisper(user['username'], "---------------------------------------")
+				chatHelper.quote(words[1], 0, 0, user)
+				client.whisper(user['username'], "---------------------------------------")
+				break;
+			}
 			out = chatHelper.quote(words[1], words[2], words[3])
 			if (out == undefined) {
 				break;

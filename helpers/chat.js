@@ -109,10 +109,11 @@ module.exports = {
 	 * retrieve: Takes the quote from the object and returns it
 	 *     to be said in the twitch chat
 	 * write: Writes quotes object to JSON file. Only admins can execute this!
-	 *
-	 * TODO: Add ability to list all quotes in a user's DMs (Requires known bot permission.)
+	 * log: Lists all quotes in a user's whispers in the format:
+	 *     number = quote
+	 * Since whispers are a oneline thing, every quote is sent in one line in the for loop
 	 */
-	quote: function(command, index, newMessage) {
+	quote: function(command, index, newMessage, user) {
 		switch(command) {
 			case "add":
 				allObjects.quotes[index] = {
@@ -122,6 +123,12 @@ module.exports = {
 
 			case "remove":
 				delete allObjects.quotes[index]
+				break;
+			
+			case "log":
+				for (const i of Object.keys(allObjects.quotes)) {
+					client.whisper(user['username'], i + " = " + allObjects.quotes[i].message);
+				}
 				break;
 
 			case "retrieve":
