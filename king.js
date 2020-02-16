@@ -189,7 +189,8 @@ client.on('chat', (channel, user, message, self) => {
 
 		// Whisper stuff to yourself!
 		case "whisper":
-			client.whisper(user['username'], words[1])
+			words.splice(0, 1)
+			client.whisper(user['username'], words.join(" "))
 			break;
 	}
 
