@@ -9,8 +9,8 @@ Restart=always
 RestartSec=10
 
 # Execution parameters
-User=textbender
-Group=textbender
+User=twitch
+Group=twitch
 WorkingDirectory=/home/twitch/KingBot
 ExecStart=/usr/bin/node /home/twitch/KingBot/king.js
 
