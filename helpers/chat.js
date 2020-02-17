@@ -7,8 +7,11 @@ const allObjects = {
 	timerList: {},
 	timerWords: {},
 	quotes: {},
-	custom: {}
+	custom: {},
+	lurkTimes: {}
 }
+
+const now = new Date();
 
 /*
  * One function to write to file x based on parameter entered.
@@ -39,6 +42,7 @@ module.exports = {
 		writeInternal(name);
 	},
 
+	// calls readInternal
 	read: function(name) {
 		readInternal(name);
 	},
@@ -65,9 +69,24 @@ module.exports = {
 	 * The stop case stops the interval. You will have to restart it using the timer start command
 	 * The write case is to write the timerWords object to the timerWords.json file.
 	 */
-	timer: function(channel, command, index, ms) {
+	timer: function(channel, command, index, ms, newMessage, username) {
 		switch(command) {
+			case "add":
+				console.log(newMessage)
+				allObjects.timerWords[index] = {
+					message: newMessage
+				}
+				break;
+			
+			case "remove":
+				delete allObjects.timerWords[index]
+				break;
+
 			case "start":
+				if (!this.ensurePhrase(index, "timerWords")) {
+					console.log("Timer phrase doesn't exist! Try adding it?")
+					break;
+				}
 				if (this.returnTimerWords(index) == false || ms == undefined) {
 					console.log("Check your syntax!")
 					console.log("Syntax: !timer start *index* *time in ms*")
@@ -75,12 +94,20 @@ module.exports = {
 				}
 				allObjects.timerList[index] = setInterval(function(){ client.say(channel, allObjects.timerWords[index].message) }, Number(ms));
 				break;
+
 			case "stop":
 				clearInterval(allObjects.timerList[index]);
 				break;
+
 			case "write":
 				writeInternal("timerWords");
 				console.log("Timer messages written successfully!")
+				break;
+
+			case "list":
+				for (const i of Object.keys(allObjects.timerWords)) {
+					client.whisper(user['username'], i + " = " + allObjects.timerWords[i].message);
+				}
 				break;
 		}
 	},
@@ -88,11 +115,6 @@ module.exports = {
 	/*
 	 * Seperate function for adding timer messages. Will be combined with timer in future release.
 	 */
-	addTimerMessage: function(index, message) {
-		allObjects.timerWords[index] = {
-			message: message
-		}
-	},
 
 	// module export for isStreamLiveInternal.
 	isStreamLive: function(userName) {
@@ -125,7 +147,7 @@ module.exports = {
 				delete allObjects.quotes[index]
 				break;
 			
-			case "log":
+			case "list":
 				for (const i of Object.keys(allObjects.quotes)) {
 					client.whisper(user['username'], i + " = " + allObjects.quotes[i].message);
 				}
@@ -162,11 +184,17 @@ module.exports = {
 	 * 
 	 * TODO: List by whisper
 	 */
-	customCommand: function(instruction, name, words) {
+	customCommand: function(instruction, name, words, user) {
 		switch(instruction) {
 			case "add":
 				allObjects.custom[name] = {
 					message: words
+				}
+				break;
+			
+			case "list":
+				for (const i of Object.keys(allObjects.custom)) {
+					console.log(i);
 				}
 				break;
 
@@ -179,5 +207,39 @@ module.exports = {
 				console.log("Custom Command successfully written!")
 				break;
 		}
+	},
+
+	/*
+	 * Check for an integer between 0 and 1
+	 * If the integer is 1, user passes vibecheck
+	 * Otherwise, user fails
+	 */
+	vibeRes: function() {
+		vibeNum = Math.floor(Math.random() * 2)
+		if (vibeNum) {
+			return " has failed the vibecheck. GIMME THAT LICENSE SIR";
+		}
+		return " has passed the vibecheck. Continue vibing to the stream";
 	}
+	/*
+	lurk: function(username) {
+		console.log(now.getTime())
+		curTime = 1581976356748;
+		if (!this.ensurePhrase(username, "lurkTimes")) {
+			allObjects.lurkTimes[username] = {
+				time: now.getTime()
+			}
+			return false;
+		}
+		//objDate = new Date(allObjects.lurkTimes[username].time);
+		//console.log(objDate.getHours())
+		//console.log("0" + objDate.getMinutes())
+		//console.log(objDate)
+		newTime = curTime - Number(allObjects.lurkTimes[username].time)
+		newDate = new Date(newTime)
+		console.log(newDate.getHours());
+		console.log(newDate.getMinutes());
+		return newTime;
+	}
+	*/
 }

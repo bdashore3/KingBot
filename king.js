@@ -118,18 +118,19 @@ client.on('chat', (channel, user, message, self) => {
 				client.action(channel, "You can't execute this command!")
 				break;
 			}
-			chatHelper.timer(channel, words[1], words[2], words[3])
-			break;
-
-		// Adds message for timer. Will be combined with timer
-		case "addtimermessage":
-			if (!isAdmin(user['username'])) {
-				client.action(channel, "You can't execute this command!")
+			if (words[1] == "add") {
+				index = words[2]
+				words.splice(0, 3)
+				chatHelper.timer(channel, "add", index, 0, words.join(" "))
+			}
+			if (words[1] == "list") {
+				client.whisper(user['username'], "Timer phrase List (Start by ?timer start *index* *ms*)")
+				client.whisper(user['username'], "---------------------------------------")
+				chatHelper.timer(channel, words[1], 0, 0, 0, user)
+				client.whisper(user['username'], "---------------------------------------")
 				break;
 			}
-			index = words[1]
-			words.splice(0, 2);
-			chatHelper.addTimerMessage(index, words.join(" "))
+			chatHelper.timer(channel, words[1], words[2], words[3])
 			break;
 
 		/*
@@ -154,7 +155,7 @@ client.on('chat', (channel, user, message, self) => {
 				chatHelper.quote("add", index, words.join(" "))
 				break;
 			}
-			else if (words[1] == "log") {
+			else if (words[1] == "list") {
 				client.whisper(user['username'], "Quotes List (Get the quote by ?quote retrieve #)")
 				client.whisper(user['username'], "---------------------------------------")
 				chatHelper.quote(words[1], 0, 0, user)
@@ -170,19 +171,29 @@ client.on('chat', (channel, user, message, self) => {
 
 		// Frontend for writing commands Admins only!
 		case "command":
-			if (!isAdmin(user['username'])) {
-				client.action(channel, "You can't execute this command!")
+			instruction = words[1];
+			name = words[2];
+
+			if (instruction == "list") {
+				client.whisper(user['username'], "Custom command list (Get the quote by ?commandname)")
+				client.whisper(user['username'], "---------------------------------------")
+				chatHelper.customCommand(words[1], 0, 0, user)
+				client.whisper(user['username'], "---------------------------------------")
 				break;
 			}
 
-			instruction = words[1];
-			name = words[2];
+			if (!isAdmin(user['username'])) {
+				client.action(channel, "You can only list commands!")
+				break;
+			}
+
 			if (instruction == "add") {
 				if (chatHelper.ensurePhrase(name, "custom")) {
 					client.say(channel, "This command already exists")
 					break;
 				}
 			}
+
 			words.splice(0, 3);
 			chatHelper.customCommand(instruction, name, words.join(" "));
 			break;
@@ -191,6 +202,30 @@ client.on('chat', (channel, user, message, self) => {
 		case "whisper":
 			words.splice(0, 1)
 			client.whisper(user['username'], words.join(" "))
+			break;
+
+		/*
+		case "lurk":
+			out = chatHelper.lurk(user['username'])
+			if (!out) {
+				client.say(channel, user['username'] + " Is currently lurking!")
+				break;
+			}
+			client.say(channel, user['username'] + " Has been lurking for " + out)
+			break;
+		*/
+		
+		/*
+		 * Check that vibe in stream!
+		 * A very simple case where a timeout of 2 seconds is set for the response to be sent
+		 * Puts it in action form because vibe checks are very important.
+		 * 
+		 * NOTE: tmi.js complains when you execute client.say directly with a setTimeout. A new
+		 * function will have to be created inside the setTimeout!
+		 */
+		case "vibecheck":
+			client.say(channel, "initating vibe check for " + user['username'])
+			setTimeout(function(){ client.action(channel, user['username'] + chatHelper.vibeRes()) }, 2000)
 			break;
 	}
 
