@@ -32,13 +32,16 @@ Once you're done, type the following command in the terminal:
 
 ## Running in a server
 
-The included systemd service is REQUIRED to run this bot in a server. Running in interactive mode is not advised. Copy the twitch.service file into /etc/systemd/system/twitch.service. Then, run these commands
+The included systemd service is REQUIRED to run this bot in a server. Running in interactive mode is not advised. Copy the twitch.service file into /etc/systemd/system/twitch.service. Then, run these commands:
 > sudo systemctl reload-daemon
+
 > sudo systemctl enable twitch.service
+
 > sudo systemctl start twitch.service
 
 Check with:
 > sudo systemctl status twitch.service
+
 > sudo journalctl -u twitch -f
 
 ## Using the webhooks:
