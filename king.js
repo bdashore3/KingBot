@@ -114,55 +114,59 @@ client.on('chat', (channel, user, message, self) => {
 
 		// Frontend for messages over an interval in chat
 		case "timer":
+			instruction = words[1]
+			name = words[2]
+			ms = words[3]
+
 			if (!isAdmin(user['username'])) {
 				client.action(channel, "You can't execute this command!")
 				break;
 			}
-			if (words[1] == "add") {
-				index = words[2]
+			if (instruction == "add") {
 				words.splice(0, 3)
-				chatHelper.timer(channel, "add", index, 0, words.join(" "))
+				chatHelper.add("timerWords", name, words.join(" "))
 			}
-			if (words[1] == "list") {
-				client.whisper(user['username'], "Timer phrase List (Start by ?timer start *index* *ms*)")
-				client.whisper(user['username'], "---------------------------------------")
-				chatHelper.timer(channel, words[1], 0, 0, 0, user)
-				client.whisper(user['username'], "---------------------------------------")
+			else if (words[1] == "list") {
+				chatHelper.timer(channel, instruction, 0, 0, user['username'])
 				break;
 			}
-			chatHelper.timer(channel, words[1], words[2], words[3])
+			chatHelper.timer(channel, instruction, name, ms)
 			break;
 
 		/*
 		 * Frontend for the quotes system.
 		 * Users cannot use the write command.
 		 * They can use all other commands.
+		 * 
+		 * There are seperate cases for add, list, write, and remove
+		 * because these call different functions or have special
+		 * code that needs to be executed.
 		 */
 		case "quote":
-			if (words[1] == "write" || words[1] == "remove") {
+			instruction = words[1];
+			name = words[2]
+
+			if (instruction == "write" || instruction == "remove") {
 				if (!isAdmin(user['username'])) {
 					client.action(channel, "You can't write to files! But you can do other stuff!")
 					break;
 				}
 			}
-			else if (words[1] == "add") {
-				index = words[2]
+			else if (instruction == "add") {
 				words.splice(0, 3);
-				if (chatHelper.ensurePhrase(index, "quotes")) {
+				if (chatHelper.ensurePhrase(name, "quotes")) {
 					client.say(channel, "This number is taken!")
 					break;
 				}
-				chatHelper.quote("add", index, words.join(" "))
+				chatHelper.add("quotes", name, words.join(" "))
 				break;
 			}
-			else if (words[1] == "list") {
-				client.whisper(user['username'], "Quotes List (Get the quote by ?quote retrieve #)")
-				client.whisper(user['username'], "---------------------------------------")
-				chatHelper.quote(words[1], 0, 0, user)
-				client.whisper(user['username'], "---------------------------------------")
+			else if (instruction == "list") {
+				chatHelper.quote(instruction, 0, user['username'])
 				break;
 			}
-			out = chatHelper.quote(words[1], words[2], words[3])
+
+			out = chatHelper.quote(instruction, name)
 			if (out == undefined) {
 				break;
 			}
@@ -175,23 +179,13 @@ client.on('chat', (channel, user, message, self) => {
 			name = words[2];
 
 			if (instruction == "list") {
-				client.whisper(user['username'], "Custom command list (Get the quote by ?commandname)")
-				client.whisper(user['username'], "---------------------------------------")
-				chatHelper.customCommand(words[1], 0, 0, user)
-				client.whisper(user['username'], "---------------------------------------")
+				chatHelper.customCommand(words[1], 0, 0, user['username'])
 				break;
 			}
 
 			if (!isAdmin(user['username'])) {
 				client.action(channel, "You can only list commands!")
 				break;
-			}
-
-			if (instruction == "add") {
-				if (chatHelper.ensurePhrase(name, "custom")) {
-					client.say(channel, "This command already exists")
-					break;
-				}
 			}
 
 			words.splice(0, 3);

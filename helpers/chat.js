@@ -41,10 +41,44 @@ module.exports = {
 	write: function(name) {
 		writeInternal(name);
 	},
-
+	
 	// calls readInternal
 	read: function(name) {
 		readInternal(name);
+	},
+
+	/*
+	 * Universal function for adding to an object
+	 * This is called in other functions to cut down
+	 * on cruft and redundancy.
+	 */
+	add: function(objName, name, newMessage) {
+		allObjects[objName][name] = {
+			message: newMessage
+		}
+	},
+
+	/*
+	 * Universal remove function
+	 * Has the same purpose as add, but removes things
+	 */
+	remove: function(objName, name) {
+		delete allObjects[objName][name];
+	},
+
+	/*
+	 * Universal list function
+	 * Whispers are a pain to repeat over and over again, so
+	 * just do it all here.
+	 */
+	list: function(username, listName, helpCommand, objName) {
+		client.whisper(username, listName + " List " + helpCommand);
+		client.whisper(username, "---------------------------------------")
+		for (const i of Object.keys(allObjects[objName])) {
+			console.log(i + " = " + allObjects[objName][i].message)
+			client.whisper(username, i + " = " + allObjects[objName][i].message);
+		}
+		client.whisper(username, "---------------------------------------")
 	},
 
 	// Function called when the "dice" command is issued
@@ -54,11 +88,11 @@ module.exports = {
 	},
 
 	// Returns if timerword exists
-	returnTimerWords: function(index) {
-		if (index == undefined) {
+	checkExists: function(objName, name) {
+		if (name == undefined || allObjects[objName][name] == undefined) {
 			return false;
 		}
-		return allObjects.timerWords[index].message;
+		return allObjects[objName][name].message;
 	},
 
 	/*
@@ -69,52 +103,39 @@ module.exports = {
 	 * The stop case stops the interval. You will have to restart it using the timer start command
 	 * The write case is to write the timerWords object to the timerWords.json file.
 	 */
-	timer: function(channel, command, index, ms, newMessage, username) {
-		switch(command) {
-			case "add":
-				console.log(newMessage)
-				allObjects.timerWords[index] = {
-					message: newMessage
-				}
-				break;
-			
+	timer: function(channel, instruction, name, ms, username) {
+		switch(instruction) {
 			case "remove":
-				delete allObjects.timerWords[index]
+				this.remove("timerWords", name)
 				break;
 
 			case "start":
-				if (!this.ensurePhrase(index, "timerWords")) {
+				if (!this.ensurePhrase(name, "timerWords")) {
 					console.log("Timer phrase doesn't exist! Try adding it?")
 					break;
 				}
-				if (this.returnTimerWords(index) == false || ms == undefined) {
+				if (this.checkExists("timerWords", name) == false || ms == undefined) {
 					console.log("Check your syntax!")
 					console.log("Syntax: !timer start *index* *time in ms*")
 					break;
 				}
-				allObjects.timerList[index] = setInterval(function(){ client.say(channel, allObjects.timerWords[index].message) }, Number(ms));
+				allObjects.timerList[name] = setInterval(function(){ client.say(channel, allObjects.timerWords[name].message) }, Number(ms));
 				break;
 
 			case "stop":
-				clearInterval(allObjects.timerList[index]);
+				clearInterval(allObjects.timerList[name]);
+				break;
+
+			case "list":
+				this.list(username, "Timer Phrase", "(Start by ?timer start *index* *ms*)", "timerWords");
 				break;
 
 			case "write":
 				writeInternal("timerWords");
-				console.log("Timer messages written successfully!")
-				break;
-
-			case "list":
-				for (const i of Object.keys(allObjects.timerWords)) {
-					client.whisper(user['username'], i + " = " + allObjects.timerWords[i].message);
-				}
+				console.log("Quotes successfully written!");
 				break;
 		}
 	},
-
-	/*
-	 * Seperate function for adding timer messages. Will be combined with timer in future release.
-	 */
 
 	// module export for isStreamLiveInternal.
 	isStreamLive: function(userName) {
@@ -126,35 +147,31 @@ module.exports = {
 	/*
 	 * Backend for quotes
 	 * Has 4 cases: add, remove, retrieve, and write
-	 * add: User can add a quote to the quotes object under a number (index)
-	 * remove: remove said quote from that index. Only admins can execute this!
+	 * add: See documentation in add function
+	 * remove: See documentation in remove function
 	 * retrieve: Takes the quote from the object and returns it
 	 *     to be said in the twitch chat
 	 * write: Writes quotes object to JSON file. Only admins can execute this!
-	 * log: Lists all quotes in a user's whispers in the format:
+	 * list: Lists all quotes in a user's whispers in the format:
 	 *     number = quote
 	 * Since whispers are a oneline thing, every quote is sent in one line in the for loop
 	 */
-	quote: function(command, index, newMessage, user) {
+	quote: function(command, name, username) {
 		switch(command) {
-			case "add":
-				allObjects.quotes[index] = {
-					message: newMessage
-				}
-				break;
-
 			case "remove":
-				delete allObjects.quotes[index]
+				this.remove("quotes", name)
 				break;
 			
 			case "list":
-				for (const i of Object.keys(allObjects.quotes)) {
-					client.whisper(user['username'], i + " = " + allObjects.quotes[i].message);
-				}
+				this.list(username, "Quotes", "(Get the quote by ?quote retrieve #)", "quotes");
 				break;
 
 			case "retrieve":
-				return allObjects.quotes[index].message;
+				if (this.checkExists("quotes", name) == false) {
+					console.log("Quote doesn't exist! Try adding one!")
+					break;
+				}
+				return allObjects.quotes[name].message;
 
 			case "write":
 				writeInternal("quotes");
@@ -184,22 +201,22 @@ module.exports = {
 	 * 
 	 * TODO: List by whisper
 	 */
-	customCommand: function(instruction, name, words, user) {
+	customCommand: function(instruction, name, words, username) {
 		switch(instruction) {
 			case "add":
-				allObjects.custom[name] = {
-					message: words
+				if (this.ensurePhrase(name, "custom")) {
+					client.say(channel, "This command already exists")
+					break;
 				}
+				this.add("custom", name, words)
 				break;
 			
 			case "list":
-				for (const i of Object.keys(allObjects.custom)) {
-					console.log(i);
-				}
+				this.list(username, "Custom command", "(Execute by ?commandname)", "custom");
 				break;
 
 			case "remove":
-				delete allObjects.custom[name]
+				this.remove("custom", name)
 				break;
 			
 			case "write":
