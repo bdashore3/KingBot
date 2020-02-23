@@ -198,16 +198,16 @@ client.on('chat', (channel, user, message, self) => {
 			client.whisper(user['username'], words.join(" "))
 			break;
 
-		/*
+
 		case "lurk":
-			out = chatHelper.lurk(user['username'])
-			if (!out) {
-				client.say(channel, user['username'] + " Is currently lurking!")
+			out = chatHelper.lurk(channel, user['username'])
+			if (out == "false") {
+				client.say("regalbot1", user['username'] + " Is currently lurking!")
 				break;
 			}
 			client.say(channel, user['username'] + " Has been lurking for " + out)
 			break;
-		*/
+
 		
 		/*
 		 * Check that vibe in stream!

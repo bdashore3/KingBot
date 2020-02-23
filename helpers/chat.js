@@ -11,8 +11,6 @@ const allObjects = {
 	lurkTimes: {}
 }
 
-const now = new Date();
-
 /*
  * One function to write to file x based on parameter entered.
  */
@@ -188,6 +186,7 @@ module.exports = {
 	ensurePhrase: function(index, parameter) {
 		if (allObjects[parameter].hasOwnProperty(index))
 			return true;
+		return false;
 	},
 
 	/*
@@ -237,26 +236,28 @@ module.exports = {
 			return " has failed the vibecheck. GIMME THAT LICENSE SIR";
 		}
 		return " has passed the vibecheck. Continue vibing to the stream";
-	}
-	/*
+	},
+
 	lurk: function(username) {
-		console.log(now.getTime())
-		curTime = 1581976356748;
 		if (!this.ensurePhrase(username, "lurkTimes")) {
-			allObjects.lurkTimes[username] = {
-				time: now.getTime()
-			}
-			return false;
+			store = new Date();
+			this.add("lurkTimes", username, store.getTime())
+			return "false";
 		}
-		//objDate = new Date(allObjects.lurkTimes[username].time);
-		//console.log(objDate.getHours())
-		//console.log("0" + objDate.getMinutes())
-		//console.log(objDate)
-		newTime = curTime - Number(allObjects.lurkTimes[username].time)
-		newDate = new Date(newTime)
-		console.log(newDate.getHours());
-		console.log(newDate.getMinutes());
+		now = new Date()
+		millis = now.getTime() - Number(allObjects.lurkTimes[username].message)
+		newTime = this.msToTime(millis);
 		return newTime;
+	},
+
+	msToTime: function(s) {
+		var ms = s % 1000;
+		s = (s - ms) / 1000;
+		var secs = s % 60;
+		s = (s - secs) / 60;
+		var mins = s % 60;
+		var hrs = (s - mins) / 60;
+		
+		return hrs + ':' + mins + ':' + secs + '.' + ms;
 	}
-	*/
 }
