@@ -200,12 +200,19 @@ client.on('chat', (channel, user, message, self) => {
 
 
 		case "lurk":
-			out = chatHelper.lurk(channel, user['username'])
-			if (out == "false") {
+			instruction = words[1];
+
+			if (instruction == "cancel") {
+				chatHelper.lurk(user['username'], true);
+				client.say(channel, `${user['username']} is no longer lurking! Enjoy the stream!`);
+				break;
+			}
+			out = chatHelper.lurk(user['username'])
+			if (!out) {
 				client.say("regalbot1", user['username'] + " Is currently lurking!")
 				break;
 			}
-			client.say(channel, user['username'] + " Has been lurking for " + out)
+			client.say(channel, `User ${user['username']} has been lurking for ${out[3]} hours, ${out[2]} minutes, ${out[1]} seconds`)
 			break;
 
 		

@@ -238,26 +238,30 @@ module.exports = {
 		return " has passed the vibecheck. Continue vibing to the stream";
 	},
 
-	lurk: function(username) {
+	lurk: function(username, cancel) {
+		if (cancel) {
+			this.remove("lurkTimes", username);
+			return;
+		}
 		if (!this.ensurePhrase(username, "lurkTimes")) {
 			store = new Date();
 			this.add("lurkTimes", username, store.getTime())
-			return "false";
+			return false;
 		}
 		now = new Date()
-		millis = now.getTime() - Number(allObjects.lurkTimes[username].message)
-		newTime = this.msToTime(millis);
+		newTime = this.msToTime(now.getTime() - Number(allObjects.lurkTimes[username].message));
 		return newTime;
 	},
 
 	msToTime: function(s) {
-		var ms = s % 1000;
-		s = (s - ms) / 1000;
-		var secs = s % 60;
-		s = (s - secs) / 60;
-		var mins = s % 60;
-		var hrs = (s - mins) / 60;
-		
-		return hrs + ':' + mins + ':' + secs + '.' + ms;
+		var time = [];
+		time[0] = s % 1000;
+		s = (s - time[0]) / 1000;
+		time[1] = s % 60;
+		s = (s - time[1]) / 60;
+		time[2] = s % 60;
+		time[3] = (s - time[2]) / 60;
+		console.log(time)
+		return time;
 	}
 }
