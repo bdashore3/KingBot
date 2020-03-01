@@ -15,7 +15,7 @@ client.connect();
 
 // Checks if the user is an admin aka a mod.
 function isAdmin(name) {
-	return (isDev(name) || 'regalbot1')
+	return (isDev(name) || name == 'regalbot1')
 }
 
 // Do NOT edit this.
@@ -51,13 +51,17 @@ const subscription = async (listener) => {
 		if (stream) {
 			console.log(`${stream.userDisplayName} just went live with title: ${stream.title}`);
 			client.action(info.channel, `Executing startup commands...`);
-			chatHelper.timer(info.channel, "start", "follow", "600000");
+			chatHelper.timer(info.channel, "start", "follow", "900000");
+			setTimeout(function() { chatHelper.timer(info.channel, "start", "discord", "900000") }, 300000);
+			client.action(info.channel, "Startup commands complete.");
 		} else {
 			// no stream, no display name
 			const user = await apiClient.helix.users.getUserById(userId);
 			console.log(`${user.displayName} just went offline`);
-			client.action(info.channel, `Executing stop commands...`)
+			client.action(info.channel, `Executing stop commands...`);
 			chatHelper.timer(info.channel, "stop", "follow");
+			chatHelper.timer(info.channel, "stop", "discord");
+			client.action(info.channel, "Stop commands complete.");
 		}
 	});
 }
@@ -227,6 +231,21 @@ client.on('chat', (channel, user, message, self) => {
 		case "vibecheck":
 			client.say(channel, "initating vibe check for " + user['username'])
 			setTimeout(function(){ client.action(channel, user['username'] + chatHelper.vibeRes()) }, 2000)
+			break;
+
+		case "so":
+		case "shoutout":
+			if (!isAdmin(user['username'])) {
+				console.log("not an admin")
+				client.deletemessage(channel, user.id);
+				break;
+			}
+			shoutoutName = words[1];
+
+			if (shoutoutName.includes("@")) {
+				shoutoutName = shoutoutName.slice(1);
+			}
+			client.action(channel, `Hey! Go and follow this cool streamer ${shoutoutName}! His twitch URL is https://twitch.tv/${shoutoutName}`);
 			break;
 	}
 
