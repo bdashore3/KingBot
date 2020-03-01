@@ -213,7 +213,7 @@ client.on('chat', (channel, user, message, self) => {
 			}
 			out = chatHelper.lurk(user['username'])
 			if (!out) {
-				client.say("regalbot1", user['username'] + " Is currently lurking!")
+				client.say(channel, user['username'] + " Is currently lurking!")
 				break;
 			}
 			client.say(channel, `User ${user['username']} has been lurking for ${out[3]} hours, ${out[2]} minutes, ${out[1]} seconds`)
