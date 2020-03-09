@@ -1,0 +1,5 @@
+Kingbot/bin/
+Kingbot/obj/
+.vs/
+packages/
+info.json
