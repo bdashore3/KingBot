@@ -33,5 +33,11 @@ namespace Kingbot.Security
 
         [JsonProperty("Prefix")]
         public string Prefix;
+
+        [JsonProperty("MongoConnection")]
+        public string MongoConnection;
+
+        [JsonProperty("SelfDB")]
+        public string SelfDB;
     }
 }

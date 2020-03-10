@@ -4,33 +4,35 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using Kingbot.Commands;
 using Kingbot.Security;
+using Kingbot.Helpers.Data;
 
 namespace Kingbot
 {
-    internal class TwitchBot
+    class TwitchBot
     {
         public static TwitchClient client;
 
         public void Connect()
         {
             bool logging = false;
-
-            Console.WriteLine("Connecting...");
             client = new TwitchClient();
             CredentialsHelper.ReadInfo();
+            DataHelper.InitDB();
             ConnectionCredentials credentials = new ConnectionCredentials(CredentialsHelper.info.BotUsername, CredentialsHelper.info.BotToken);
+            Console.WriteLine("Connecting...");
             client.Initialize(credentials, CredentialsHelper.info.Channel);
 
             if (logging) 
                 client.OnLog += Client_OnLog;
 
             client.OnConnectionError += Client_OnConnectionError;
-            client.OnMessageReceived += client_OnMessageReceived;
+            client.OnMessageReceived += Client_OnMessageReceived;
 
             client.Connect();
+            Console.WriteLine($"Connected to {CredentialsHelper.info.Channel}");
         }
 
-        private void Disconnect()
+        public void Disconnect()
         {
             Console.WriteLine("Disconnecting...");
         }
@@ -45,7 +47,7 @@ namespace Kingbot
             Console.WriteLine(e.Data);
         }
 
-        private void client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
+        private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
             if (e.ChatMessage.Message.Contains(CredentialsHelper.info.Prefix))
             {

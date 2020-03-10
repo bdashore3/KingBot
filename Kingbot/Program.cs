@@ -12,7 +12,7 @@ namespace Kingbot
 
             Console.ReadLine();
 
-            //bot.Disconnect();
+            bot.Disconnect();
         }
     }
 }
