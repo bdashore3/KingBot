@@ -11,6 +11,7 @@ namespace Kingbot
     class TwitchBot
     {
         public static TwitchClient client;
+        public static string channel;
 
         public void Connect()
         {
@@ -19,8 +20,9 @@ namespace Kingbot
             CredentialsHelper.ReadInfo();
             DataHelper.InitDB();
             ConnectionCredentials credentials = new ConnectionCredentials(CredentialsHelper.info.BotUsername, CredentialsHelper.info.BotToken);
+            channel = CredentialsHelper.info.Channel;
             Console.WriteLine("Connecting...");
-            client.Initialize(credentials, CredentialsHelper.info.Channel);
+            client.Initialize(credentials, channel);
 
             if (logging) 
                 client.OnLog += Client_OnLog;

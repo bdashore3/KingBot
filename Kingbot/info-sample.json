@@ -1,8 +1,10 @@
 {
-  "ApiId" : "",
-  "ApiSecret" : "",
-  "BotToken" : "",
-  "BotUsername" : "",
-  "Channel" : "",
-  "Prefix" :  ""
+  "ApiId": "",
+  "ApiSecret": "",
+  "BotToken": "",
+  "BotUsername": "",
+  "Channel": "",
+  "Prefix": "",
+  "MongoConnection": "",
+  "SelfDB": ""
 }

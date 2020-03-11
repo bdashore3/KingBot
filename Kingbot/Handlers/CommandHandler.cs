@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Kingbot.Security;
 using System.Linq;
 using Kingbot.Modules;
-using Kingbot.Data;
 
 namespace Kingbot.Commands
 {
@@ -24,8 +23,23 @@ namespace Kingbot.Commands
                     break;
                 case "quote":
                     Console.WriteLine("Command Quote Recieved");
-                    string quote = await quotes.PostQuote(words[1]);
-                    TwitchBot.client.SendMessage(channel, quote);
+                    string instruction = words[1];
+                    string index = words[2];
+
+                    if (instruction == "retrieve")
+                    {
+                        TwitchBot.client.SendMessage(channel, await quotes.ReturnQuote(index));
+                    }
+                    if (instruction == "add")
+                    {
+                        words.RemoveRange(0, 3);
+                        string message = String.Join(" ", words.ToArray());
+                        await quotes.AddQuote(index, message);
+                    }
+                    if (instruction == "delete")
+                    {
+                        await quotes.RemoveQuote(index);
+                    }
                     break;
             }
         }
