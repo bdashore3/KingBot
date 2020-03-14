@@ -1,5 +1,6 @@
 Kingbot/bin/
 Kingbot/obj/
+Kingbot/Properties/
 .vs/
 packages/
 info.json
