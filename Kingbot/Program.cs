@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Kingbot
 {
@@ -6,13 +7,7 @@ namespace Kingbot
     {
         static void Main(string[] args)
         {
-            TwitchBot bot  = new TwitchBot();
-
-            bot.Connect();
-
-            Console.ReadLine();
-
-            bot.Disconnect();
+            TwitchBot.Start(args[0]).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 }

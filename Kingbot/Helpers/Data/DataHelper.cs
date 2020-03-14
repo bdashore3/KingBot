@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Kingbot.Security;
+using Kingbot.Helpers.Security;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Threading.Tasks;
-using Kingbot.Data;
 
 namespace Kingbot.Helpers.Data
 {
     class DataHelper
     {
-        private static MongoClient dbClient = new MongoClient(CredentialsHelper.info.MongoConnection);
+        private static MongoClient dbClient = new MongoClient(CredentialsHelper.MongoConnection);
         private static IMongoDatabase SelfDB;
         public static void InitDB()
         {
-            SelfDB = dbClient.GetDatabase(CredentialsHelper.info.SelfDB);
+            SelfDB = dbClient.GetDatabase(CredentialsHelper.SelfDB);
         }
 
         public static async Task<string> GetQuote(string value, string result)
