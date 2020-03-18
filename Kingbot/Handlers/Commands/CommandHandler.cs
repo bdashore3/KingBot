@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kingbot.Helpers.Data;
 using Kingbot.Modules;
 
 namespace Kingbot.Commands
@@ -10,41 +11,53 @@ namespace Kingbot.Commands
     {
         public static async Task HandleCommand(string og)
         {
-            string msg = og.ToLower().Substring(1);
+
+            /*
+             * Flow:
+             * 1. Remove the message prefix
+             * 2. Convert the words into a List (Not an array!)
+             * 3. Make the command lowercase for the switch statement
+             */
+
+            string msg = og.Substring(1);
             List<String> words = msg.Split(" ").ToList();
-            string command = words[0];
+            string command = words[0].ToLower();
             string channel = TwitchBot.channel;
 
+            /*
+             * The array words at index 0 (words[0]) is
+             * passed through the switch statement.
+             * 
+             * From here, the appropriate class is executed
+             * with all words being passed to said class
+             * 
+             * TODO: Add checks for administrators (Moderators)
+             */
             switch (command)
             {
                 case "ping":
                     Console.WriteLine("Command Ping Recieved");
-                    TwitchBot.client.SendMessage(channel, "Pong");
+                    Other.Ping();
                     break;
 
                 case "quote":
-                    {
-                        Console.WriteLine("Command Quote Recieved");
-                        string instruction = words[1];
-                        string index = words[2];
+                    Console.WriteLine("Command Quote Recieved");
+                    await Quotes.Handle(words);
+                    break;
 
-                        switch (instruction)
-                        {
-                            case "retrieve":
-                                TwitchBot.client.SendMessage(channel, await quotes.ReturnQuote(index));
-                                break;
-                            case "add":
-                                words.RemoveRange(0, 3);
-                                string message = String.Join(" ", words.ToArray());
-                                await quotes.AddQuote(index, message);
-                                break;
-                            case "delete":
-                                await quotes.RemoveQuote(index);
-                                break;
-                        }
-                        break;
-                    }
+                case "interval":
+                    Console.WriteLine("Command Interval Received");
+                    await Interval.Handle(words);
+                    break;
+
+                case "command":
+                    Console.WriteLine("Command Custom Recieved");
+                    await Custom.Handle(words);
+                    break;
             }
+
+            if (await DataHelper.Ensure(command))
+                TwitchBot.client.SendMessage(TwitchBot.channel, await DataHelper.Fetch("commands", command, "message"));
         }
     }
 }

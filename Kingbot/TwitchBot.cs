@@ -11,18 +11,25 @@ namespace Kingbot
 {
     class TwitchBot
     {
+        // Make the client and channel have scope across all files
         public static TwitchClient client;
         public static string channel;
 
+        // From Program.cs. Starts the bot
         public static async Task Start(string CredsPath)
         {
             await Connect(CredsPath);
-
-            Console.ReadLine();
-
-            Disconnect();
+            await Task.Delay(-1);
         }
 
+        /*
+         * Flow:
+         * 1. Create a new TwitchClient instance
+         * 2. Read the credentials from CredentialsHelper
+         * 3. Connect to the Database
+         * 4. Set all credentials and the channel variable
+         * 5. Start our client and listen to events
+         */
         private static async Task Connect(string CredsPath)
         {
             bool logging = false;
@@ -44,27 +51,34 @@ namespace Kingbot
             Console.WriteLine($"Connected to {channel}");
         }
 
-        private static void Disconnect()
-        {
-            Console.WriteLine("Disconnecting...");
-        }
-
+        // If there's an error, log it.
         private static void Client_OnConnectionError(object sender, OnConnectionErrorArgs e)
         {
             Console.WriteLine($"Error! {e.Error}");
         }
 
+        // If logging is enabled in Connect(), put logs in console
         private static void Client_OnLog(object sender, OnLogArgs e)
         {
             Console.WriteLine(e.Data);
         }
 
+        // If a message contains the prefix, handle it. The try/catch is to prevent crashing of the program
         private static async void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
             if (e.ChatMessage.Message.Contains(CredentialsHelper.Prefix))
             {
                 Console.WriteLine($"Command Recieved: {e.ChatMessage.Message}");
-                await CommandHandler.HandleCommand(e.ChatMessage.Message);
+                //try
+                //{
+                    await CommandHandler.HandleCommand(e.ChatMessage.Message);
+                //}
+                /*
+                catch
+                {
+                    client.SendMessage(channel, "That command syntax is wrong.");
+                }
+                */
             }
         }
     }

@@ -6,6 +6,7 @@ namespace Kingbot.Helpers.Security
 {
     class CredentialsHelper
     {
+        // All variables are initialized here
         public static string BotToken { get; private set; }
         public static string ApiToken { get; private set; }
         public static string ApiId { get; private set; }
@@ -64,6 +65,8 @@ namespace Kingbot.Helpers.Security
             SelfDB = creds.SelfDB;
             return true;
         }
+
+        // Empty the tokens from RAM once we've authenticated
         public static void WipeToken()
         {
             BotToken = "";
