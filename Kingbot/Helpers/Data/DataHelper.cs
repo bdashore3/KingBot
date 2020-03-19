@@ -1,96 +1,58 @@
-﻿using System;
+﻿using Aerospike.Client;
 using Kingbot.Helpers.Security;
-using MongoDB.Driver;
-using MongoDB.Bson;
+using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
 
 namespace Kingbot.Helpers.Data
 {
     class DataHelper
     {
-        // Connect and set the database we're using
-        private static MongoClient dbClient = new MongoClient(CredentialsHelper.MongoConnection);
-        private static IMongoDatabase SelfDB;
-        public static void InitDB()
+        private static AsyncClient AeroClient;
+        private static WritePolicy policy = new WritePolicy();
+        private static string SelfDB = CredentialsHelper.SelfDB;
+        public static void InitDb()
         {
-            SelfDB = dbClient.GetDatabase(CredentialsHelper.SelfDB);
+            AeroClient = new AsyncClient(CredentialsHelper.AeroIP, 3000);
         }
 
-        // Generic method to fetch info from the database
-        public static async Task<string> Fetch(string CollectionName, string value, string result)
+        public static void Write(string table, string index, string message)
         {
-            var collection = SelfDB.GetCollection<BsonDocument>(CollectionName);
+            Key key = new Key(SelfDB, table, index);
+            Bin bin1 = new Bin("index", index);
+            Bin bin2 = new Bin("message", message);
 
-            if (collection == null)
-                return null;
-
-            var filter = Builders<BsonDocument>.Filter.Eq("index", value);
-            var firstDocument = await collection.Find(filter).FirstOrDefaultAsync();
-
-            if (firstDocument == null)
-                return null;
-
-            return (firstDocument.GetElement(result).Value.ToString());
+            AeroClient.Put(policy, key, bin1, bin2);
         }
 
-        // Generic method to create a new entry in the database
-        public static async Task Create(string list, BsonDocument document)
+        public static string Read(string table, string index)
         {
-            var collection = SelfDB.GetCollection<BsonDocument>(list);
-            await collection.InsertOneAsync(document);
-        }
-
-        // Generic method to delete from the database
-        public static async Task Delete(string list, string value)
-        {
-            var collection = SelfDB.GetCollection<BsonDocument>(list);
-            var filter = Builders<BsonDocument>.Filter.Eq("index", value);
-            await collection.DeleteOneAsync(filter);
-            Console.WriteLine("Deleted successfully");
-        }
-
-        public static async Task<long> GetAmount(string list)
-        {
-            var collection = SelfDB.GetCollection<BsonDocument>(list);
-            long result = await collection.CountDocumentsAsync(new BsonDocument());
-            return result;
-        }
-
-        public static async Task GetCommands()
-        {
-            long num = await GetAmount("commands");
-
-            ConcurrentDictionary<string, string> custom = new ConcurrentDictionary<string, string>();
-
-            var collection = SelfDB.GetCollection<BsonDocument>("commands");
-
-            int n = 0;
-            while (n <= num) 
+            Key key = new Key("kingbot", table, index);
+            Record record = AeroClient.Get(policy, key, "message");
+            if (record != null)
             {
-
-            }
-        }
-
-        /*
-        public static async Task ConvertToJson()
-        {
-            var collection = SelfDB.GetCollection<BsonDocument>("commands");
-            var jsonWriterSettings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
-            JObject json = JObject.Parse(collection.ToJson<MongoDB.Bson.BsonDocument>(jsonWriterSettings));
-        }
-        */
-
-        // TODO: Add a method to ensure a key is in the database
-
-        public static async Task<bool> Ensure(string name)
-        {
-            if (await Fetch("commands", name, "message") == null)
-            {
-                return false;
+                return record.GetValue("message").ToString();
             }
 
-            return true;
+            return null;
+        }
+
+        public static void Delete(string table, string index)
+        {
+            Key key = new Key("kingbot", table, index);
+
+            AeroClient.Delete(policy, key);
+        }
+
+        public static bool Ensure(string table, string index)
+        {
+            return !(Read(table, index) == null);
+        }
+
+        public static void CloseDb()
+        {
+            AeroClient.Close();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Kingbot.Helpers.Security
         public static string Channel { get; private set; }
         public static string BotUsername { get; private set; }
         public static string Prefix { get; private set; }
-        public static string MongoConnection { get; private set; }
+        public static string AeroIP { get; private set; }
         public static string SelfDB { get; private set; }
 
         // This struct might show warnings about no initialized value
@@ -39,8 +39,8 @@ namespace Kingbot.Helpers.Security
             [JsonProperty("Prefix")]
             public string Prefix;
 
-            [JsonProperty("MongoConnection")]
-            public string MongoConnection;
+            [JsonProperty("AeroIP")]
+            public string AeroIP;
 
             [JsonProperty("SelfDB")]
             public string SelfDB;
@@ -61,7 +61,7 @@ namespace Kingbot.Helpers.Security
             Channel = creds.Channel;
             BotUsername = creds.BotUsername;
             Prefix = creds.Prefix;
-            MongoConnection = creds.MongoConnection;
+            AeroIP = creds.AeroIP;
             SelfDB = creds.SelfDB;
             return true;
         }

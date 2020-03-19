@@ -64,21 +64,19 @@ namespace Kingbot
         }
 
         // If a message contains the prefix, handle it. The try/catch is to prevent crashing of the program
-        private static async void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
+        private static void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
             if (e.ChatMessage.Message.Contains(CredentialsHelper.Prefix))
             {
                 Console.WriteLine($"Command Recieved: {e.ChatMessage.Message}");
-                //try
-                //{
-                    await CommandHandler.HandleCommand(e.ChatMessage.Message);
-                //}
-                /*
+                try
+                {
+                    CommandHandler.HandleCommand(e.ChatMessage.Message);
+                }
                 catch
                 {
-                    client.SendMessage(channel, "That command syntax is wrong.");
+                    client.SendMessage(channel, "This command syntax doesn't work! Check the help?");
                 }
-                */
             }
         }
     }

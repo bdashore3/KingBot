@@ -1,9 +1,8 @@
 ﻿using Kingbot.Helpers.Data;
-using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Timers;
+
 namespace Kingbot.Modules
 {
     class Interval
@@ -12,7 +11,7 @@ namespace Kingbot.Modules
         private static Dictionary<string, Timer> intervals = new Dictionary<string, Timer>();
 
         // Handles command string given from the CommandHandler
-        public static async Task Handle(List<String> words)
+        public static void Handle(List<String> words)
         {
             string instruction = words[1].ToLower();
             string name = words[2];
@@ -22,7 +21,7 @@ namespace Kingbot.Modules
                 case "start":
                     string ms = words[3];
 
-                    await StartInterval(name, int.Parse(ms));
+                    StartInterval(name, int.Parse(ms));
                     break;
                 case "stop":
                     StopInterval(name);
@@ -30,10 +29,10 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    await AddInterval(name, message);
+                    AddInterval(name, message);
                     break;
                 case "remove":
-                    await DataHelper.Delete("intervals", name);
+                    DataHelper.Delete("intervals", name);
                     break;
             }
         }
@@ -41,15 +40,9 @@ namespace Kingbot.Modules
         // Add a new interval phrase and message into the database
 
         // TODO: Add ensure check
-        private static async Task AddInterval(string name, string message)
+        private static void AddInterval(string name, string message)
         {
-            var doc = new BsonDocument
-            {
-                {"index", name},
-                {"message", message}
-            };
-
-            await DataHelper.Create("intervals", doc);
+            DataHelper.Write("intervals", name, message);
         }
 
         /*
@@ -58,9 +51,9 @@ namespace Kingbot.Modules
          * 2. Set the interval's ms, event, and start it
          * 3. Keep posting a message to the channel until the stop command is executed
          */
-        private static async Task StartInterval(string name, int ms)
+        private static void StartInterval(string name, int ms)
         {
-            string message = await DataHelper.Fetch("intervals", name, "message");
+            string message = DataHelper.Read("intervals", name);
             intervals[name] = new Timer(ms);
             intervals[name].Elapsed += (sender, e) => OnTimedEvent(sender, message);
             intervals[name].AutoReset = true;

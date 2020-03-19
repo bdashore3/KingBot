@@ -5,6 +5,6 @@
   "BotUsername": "",
   "Channel": "",
   "Prefix": "",
-  "MongoConnection": "",
+  "AeroIP": "",
   "SelfDB": ""
 }
