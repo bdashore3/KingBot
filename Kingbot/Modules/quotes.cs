@@ -1,6 +1,7 @@
 ﻿using System;
 using Kingbot.Helpers.Data;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Kingbot.Modules
 {
@@ -12,7 +13,7 @@ namespace Kingbot.Modules
          * and saying in the twitch client.
          */
 
-        public static void Handle(List<String> words)
+        public static async Task Handle(List<String> words)
         {
             string instruction = words[1].ToLower();
             string index = words[2];
@@ -20,15 +21,15 @@ namespace Kingbot.Modules
             switch (instruction)
             {
                 case "retrieve":
-                    TwitchBot.client.SendMessage(TwitchBot.channel, ReturnQuote(index));
+                    TwitchBot.client.SendMessage(TwitchBot.channel, await ReturnQuote(index));
                     break;
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    AddQuote(index, message);
+                    await AddQuote(index, message);
                     break;
                 case "delete":
-                    DataHelper.Delete("quotes", index);
+                    await DataHelper.Delete("quotes", index);
                     break;
             }
         }
@@ -37,9 +38,9 @@ namespace Kingbot.Modules
          * Get the quote from the database and return it to the
          * calling function.
          */
-        private static string ReturnQuote(string index)
+        private static async Task<string> ReturnQuote(string index)
         {
-            var result = DataHelper.Read("quotes", index);
+            var result = await DataHelper.Read("quotes", index);
 
             if (result == null)
                 return "This quote doesn't exist! Try adding it?";
@@ -56,11 +57,11 @@ namespace Kingbot.Modules
          * Quotes cannot be updated unless executed by an admin
          */
 
-        private static void AddQuote(string index, string message)
+        private static async Task AddQuote(string index, string message)
         {
             //TODO: Add ensurequote here
 
-            DataHelper.Write("quotes", index, message);
+            await DataHelper.Write("quotes", index, message);
         }
     }
 }

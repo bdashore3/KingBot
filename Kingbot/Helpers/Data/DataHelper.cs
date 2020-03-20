@@ -12,12 +12,12 @@ namespace Kingbot.Helpers.Data
         private static AsyncClient AeroClient;
         private static WritePolicy policy = new WritePolicy();
         private static string SelfDB = CredentialsHelper.SelfDB;
-        public static void InitDb()
+        public static void InitDB()
         {
             AeroClient = new AsyncClient(CredentialsHelper.AeroIP, 3000);
         }
 
-        public static void Write(string table, string index, string message)
+        public static async Task Write(string table, string index, string message)
         {
             Key key = new Key(SelfDB, table, index);
             Bin bin1 = new Bin("index", index);
@@ -26,7 +26,7 @@ namespace Kingbot.Helpers.Data
             AeroClient.Put(policy, key, bin1, bin2);
         }
 
-        public static string Read(string table, string index)
+        public static async Task<string> Read(string table, string index)
         {
             Key key = new Key("kingbot", table, index);
             Record record = AeroClient.Get(policy, key, "message");
@@ -38,14 +38,14 @@ namespace Kingbot.Helpers.Data
             return null;
         }
 
-        public static void Delete(string table, string index)
+        public static async Task Delete(string table, string index)
         {
             Key key = new Key("kingbot", table, index);
 
             AeroClient.Delete(policy, key);
         }
 
-        public static bool Ensure(string table, string index)
+        public static async Task<bool> Ensure(string table, string index)
         {
             return !(Read(table, index) == null);
         }

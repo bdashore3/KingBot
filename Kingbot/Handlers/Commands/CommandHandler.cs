@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Kingbot.Helpers.Data;
 using Kingbot.Modules;
 
@@ -8,9 +9,8 @@ namespace Kingbot.Commands
 {
     class CommandHandler
     {
-        public static void HandleCommand(string og)
+        public static async Task HandleCommand(string og)
         {
-
             /*
              * Flow:
              * 1. Remove the message prefix
@@ -41,22 +41,22 @@ namespace Kingbot.Commands
 
                 case "quote":
                     Console.WriteLine("Command Quote Recieved");
-                    Quotes.Handle(words);
+                    await Quotes.Handle(words);
                     break;
 
                 case "interval":
                     Console.WriteLine("Command Interval Received");
-                    Interval.Handle(words);
+                    await Interval.Handle(words);
                     break;
 
                 case "command":
                     Console.WriteLine("Command Custom Recieved");
-                    Custom.Handle(words);
+                    await Custom.Handle(words);
                     break;
             }
 
-            if (DataHelper.Ensure("commands", command))
-                TwitchBot.client.SendMessage(TwitchBot.channel, DataHelper.Read("commands", command));
+            if (await DataHelper.Ensure("commands", command))
+                TwitchBot.client.SendMessage(TwitchBot.channel, await DataHelper.Read("commands", command));
         }
     }
 }

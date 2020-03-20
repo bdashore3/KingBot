@@ -1,12 +1,13 @@
 ﻿using Kingbot.Helpers.Data;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Kingbot.Modules
 {
     class Custom
     {
-        public static void Handle(List<String> words)
+        public static async Task Handle(List<String> words)
         {
             string instruction = words[1].ToLower();
             string name = words[2];
@@ -17,17 +18,17 @@ namespace Kingbot.Modules
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
 
-                    AddCommand(name, message);
+                    await AddCommand(name, message);
                     break;
                 case "remove":
-                    DataHelper.Delete("commands", name);
+                    await DataHelper.Delete("commands", name);
                     break;
             }
         }
 
-        private static void AddCommand(string name, string message)
+        private static async Task AddCommand(string name, string message)
         {
-            DataHelper.Write("commands", name, message);
+            await DataHelper.Write("commands", name, message);
         }
     }
 }

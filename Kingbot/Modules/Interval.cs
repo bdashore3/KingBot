@@ -1,6 +1,7 @@
 ﻿using Kingbot.Helpers.Data;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Kingbot.Modules
@@ -11,7 +12,7 @@ namespace Kingbot.Modules
         private static Dictionary<string, Timer> intervals = new Dictionary<string, Timer>();
 
         // Handles command string given from the CommandHandler
-        public static void Handle(List<String> words)
+        public static async Task Handle(List<String> words)
         {
             string instruction = words[1].ToLower();
             string name = words[2];
@@ -21,7 +22,7 @@ namespace Kingbot.Modules
                 case "start":
                     string ms = words[3];
 
-                    StartInterval(name, int.Parse(ms));
+                    await StartInterval(name, int.Parse(ms));
                     break;
                 case "stop":
                     StopInterval(name);
@@ -29,20 +30,20 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    AddInterval(name, message);
+                    await AddInterval(name, message);
                     break;
                 case "remove":
-                    DataHelper.Delete("intervals", name);
+                    await DataHelper.Delete("intervals", name);
                     break;
             }
         }
 
         // Add a new interval phrase and message into the database
-
+        
         // TODO: Add ensure check
-        private static void AddInterval(string name, string message)
+        private static async Task AddInterval(string name, string message)
         {
-            DataHelper.Write("intervals", name, message);
+            await DataHelper.Write("intervals", name, message);
         }
 
         /*
@@ -51,9 +52,9 @@ namespace Kingbot.Modules
          * 2. Set the interval's ms, event, and start it
          * 3. Keep posting a message to the channel until the stop command is executed
          */
-        private static void StartInterval(string name, int ms)
+        private static async Task StartInterval(string name, int ms)
         {
-            string message = DataHelper.Read("intervals", name);
+            string message = await DataHelper.Read("intervals", name);
             intervals[name] = new Timer(ms);
             intervals[name].Elapsed += (sender, e) => OnTimedEvent(sender, message);
             intervals[name].AutoReset = true;
