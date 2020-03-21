@@ -1,11 +1,4 @@
-﻿using Kingbot.Helpers.Security;
-using Kingbot.Modules;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using TwitchLib.Api;
-using TwitchLib.Api.Services;
+﻿using System;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 
 namespace Kingbot.Helpers.API

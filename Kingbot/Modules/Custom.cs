@@ -17,11 +17,16 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-
+                    if (await DataHelper.Ensure("commands", name))
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} already exists!");
+                        break;
+                    }
                     await AddCommand(name, message);
                     break;
                 case "remove":
                     await DataHelper.Delete("commands", name);
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} successfully deleted");
                     break;
             }
         }
@@ -29,6 +34,7 @@ namespace Kingbot.Modules
         private static async Task AddCommand(string name, string message)
         {
             await DataHelper.Write("commands", name, message);
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"New command {name} successfully written");
         }
     }
 }

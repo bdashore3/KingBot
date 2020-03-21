@@ -35,17 +35,14 @@ namespace Kingbot.Commands
             switch (command)
             {
                 case "ping":
-                    Console.WriteLine("Command Ping Recieved");
                     Other.Ping();
                     break;
 
                 case "quote":
-                    Console.WriteLine("Command Quote Recieved");
                     await Quotes.Handle(words, IsMod);
                     break;
 
                 case "interval":
-                    Console.WriteLine("Command Interval Received");
                     if (IsMod)
                     {
                         await Interval.Handle(words);
@@ -60,7 +57,6 @@ namespace Kingbot.Commands
                 case "command":
                     if (IsMod)
                     {
-                        Console.WriteLine("Command Custom Recieved");
                         await Custom.Handle(words);
                     }
                     else

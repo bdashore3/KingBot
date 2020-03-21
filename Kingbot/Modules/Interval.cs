@@ -30,10 +30,16 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
+                    if (await DataHelper.Ensure("intervals", name))
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {name} already exists!");
+                        break;
+                    }
                     await AddInterval(name, message);
                     break;
                 case "remove":
                     await DataHelper.Delete("intervals", name);
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted the interval message: {name}");
                     break;
             }
         }
@@ -44,6 +50,7 @@ namespace Kingbot.Modules
         private static async Task AddInterval(string name, string message)
         {
             await DataHelper.Write("intervals", name, message);
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {name} written!");
         }
 
         /*
@@ -78,7 +85,7 @@ namespace Kingbot.Modules
             if (intervals.ContainsKey(name))
                 intervals[name].Stop();
             else
-                TwitchBot.client.SendMessage(TwitchBot.channel, "This timer doesn't exist! Perhaps you never started it?");
+                TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval {name}! Perhaps you never started it?");
         }
     }
 }

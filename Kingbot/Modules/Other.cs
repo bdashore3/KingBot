@@ -14,7 +14,7 @@ namespace Kingbot.Modules
         static string channel = TwitchBot.channel;
         public static void Ping()
         {
-            TwitchBot.client.SendMessage(channel, "Pong");
+            TwitchBot.client.SendMessage(channel, "Pong!");
         }
     }
 }

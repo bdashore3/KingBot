@@ -104,10 +104,9 @@ namespace Kingbot
         {
             if (e.ChatMessage.Message.Contains(CredentialsHelper.Prefix))
             {
-                Console.WriteLine($"Command Recieved: {e.ChatMessage.Message}");
                 try
                 {
-                    if (e.ChatMessage.IsModerator)
+                    if (e.ChatMessage.IsModerator || e.ChatMessage.IsBroadcaster)
                         await CommandHandler.HandleCommand(e.ChatMessage.Message, true);
                     else
                         await CommandHandler.HandleCommand(e.ChatMessage.Message, false);

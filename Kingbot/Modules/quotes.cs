@@ -30,7 +30,7 @@ namespace Kingbot.Modules
                     string message = String.Join(" ", words.ToArray());
                     if (await DataHelper.Ensure("quotes", index))
                     {
-                        TwitchBot.client.SendMessage(TwitchBot.channel, "This quote already exists!");
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} already exists!");
                         break;
                     }
                     await AddQuote(index, message);
@@ -39,6 +39,7 @@ namespace Kingbot.Modules
                     if (IsMod)
                     {
                         await DataHelper.Delete("quotes", index);
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} successfully deleted!");
                         break;
                     }
                     else
@@ -58,7 +59,7 @@ namespace Kingbot.Modules
             var result = await DataHelper.Read("quotes", index);
 
             if (result == null)
-                return "This quote doesn't exist! Try adding it?";
+                return $"Quote {index} doesn't exist! Try adding it?";
             else
                 return result;
         }
@@ -75,6 +76,7 @@ namespace Kingbot.Modules
         private static async Task AddQuote(string index, string message)
         {
             await DataHelper.Write("quotes", index, message);
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} successfully written");
         }
     }
 }
