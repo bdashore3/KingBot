@@ -1,0 +1,36 @@
+[Unit]
+Description=Kingbri's Twitch Bot
+After=multi-user.target
+
+[Service]
+# Base settings
+Type=simple
+Restart=always
+RestartSec=10
+
+# Execution parameters
+User=twitch
+Group=twitch
+WorkingDirectory=/home/twitch/KingBot/Kingbot
+Environment = "SCRIPT_ARGS=info.json"
+ExecStart=/usr/bin/dotnet /home/twitch/KingBot/Kingbot/bin/Debug/netcoreapp3.1/Kingbot.dll $SCRIPT_ARGS
+
+# Limit damage in case something goes awry
+MemoryLimit=256M
+CPUQuota=200%
+
+# Security
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
