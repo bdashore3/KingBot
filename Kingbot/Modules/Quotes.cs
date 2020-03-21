@@ -35,7 +35,7 @@ namespace Kingbot.Modules
                     }
                     await AddQuote(index, message);
                     break;
-                case "delete":
+                case "remove":
                     if (IsMod)
                     {
                         await DataHelper.Delete("quotes", index);
@@ -76,7 +76,7 @@ namespace Kingbot.Modules
         private static async Task AddQuote(string index, string message)
         {
             await DataHelper.Write("quotes", index, message);
-            TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} successfully written");
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} successfully written!");
         }
     }
 }

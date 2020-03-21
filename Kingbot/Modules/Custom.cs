@@ -26,7 +26,7 @@ namespace Kingbot.Modules
                     break;
                 case "remove":
                     await DataHelper.Delete("commands", name);
-                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} successfully deleted");
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} successfully deleted!");
                     break;
             }
         }
@@ -34,7 +34,7 @@ namespace Kingbot.Modules
         private static async Task AddCommand(string name, string message)
         {
             await DataHelper.Write("commands", name, message);
-            TwitchBot.client.SendMessage(TwitchBot.channel, $"New command {name} successfully written");
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"New command {name} successfully written!");
         }
     }
 }

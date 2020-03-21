@@ -39,7 +39,7 @@ namespace Kingbot.Modules
                     break;
                 case "remove":
                     await DataHelper.Delete("intervals", name);
-                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted the interval message: {name}");
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted the interval message: {name}!");
                     break;
             }
         }

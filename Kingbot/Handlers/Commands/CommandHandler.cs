@@ -18,7 +18,6 @@ namespace Kingbot.Commands
              * 3. Make the command lowercase for the switch statement
              */
 
-            Console.WriteLine(IsMod);
             string msg = og.Substring(1);
             List<string> words = msg.Split(" ").ToList();
             string command = words[0].ToLower();
