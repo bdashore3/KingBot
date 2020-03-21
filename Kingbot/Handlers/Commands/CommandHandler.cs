@@ -9,7 +9,7 @@ namespace Kingbot.Commands
 {
     class CommandHandler
     {
-        public static async Task HandleCommand(string og)
+        public static async Task HandleCommand(string og, bool IsMod)
         {
             /*
              * Flow:
@@ -18,10 +18,10 @@ namespace Kingbot.Commands
              * 3. Make the command lowercase for the switch statement
              */
 
+            Console.WriteLine(IsMod);
             string msg = og.Substring(1);
-            List<String> words = msg.Split(" ").ToList();
+            List<string> words = msg.Split(" ").ToList();
             string command = words[0].ToLower();
-            string channel = TwitchBot.channel;
 
             /*
              * The array words at index 0 (words[0]) is
@@ -41,20 +41,37 @@ namespace Kingbot.Commands
 
                 case "quote":
                     Console.WriteLine("Command Quote Recieved");
-                    await Quotes.Handle(words);
+                    await Quotes.Handle(words, IsMod);
                     break;
 
                 case "interval":
                     Console.WriteLine("Command Interval Received");
-                    await Interval.Handle(words);
-                    break;
+                    if (IsMod)
+                    {
+                        await Interval.Handle(words);
+                        break;
+                    }
+                    else
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, "You can't execute this command!");
+                        break;
+                    }
 
                 case "command":
-                    Console.WriteLine("Command Custom Recieved");
-                    await Custom.Handle(words);
+                    if (IsMod)
+                    {
+                        Console.WriteLine("Command Custom Recieved");
+                        await Custom.Handle(words);
+                    }
+                    else
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, "You can't execute this command!");
+                        break;
+                    }
                     break;
             }
 
+            // If the command exists in custom commands, send the message
             if (await DataHelper.Ensure("commands", command))
                 TwitchBot.client.SendMessage(TwitchBot.channel, await DataHelper.Read("commands", command));
         }

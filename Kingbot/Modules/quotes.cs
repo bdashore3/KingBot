@@ -9,11 +9,13 @@ namespace Kingbot.Modules
     {
         /*
          * Handles all quote related commands
-         * Links up to the mongodb database for reading
+         * Links up to the aerospike database for reading
          * and saying in the twitch client.
+         * 
+         * TODO: Make the admin check less repetitive
          */
 
-        public static async Task Handle(List<String> words)
+        public static async Task Handle(List<string> words, bool IsMod)
         {
             string instruction = words[1].ToLower();
             string index = words[2];
@@ -26,11 +28,24 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
+                    if (await DataHelper.Ensure("quotes", index))
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, "This quote already exists!");
+                        break;
+                    }
                     await AddQuote(index, message);
                     break;
                 case "delete":
-                    await DataHelper.Delete("quotes", index);
-                    break;
+                    if (IsMod)
+                    {
+                        await DataHelper.Delete("quotes", index);
+                        break;
+                    }
+                    else
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, "You can't execute this command!");
+                        break;
+                    }
             }
         }
 
@@ -59,8 +74,6 @@ namespace Kingbot.Modules
 
         private static async Task AddQuote(string index, string message)
         {
-            //TODO: Add ensurequote here
-
             await DataHelper.Write("quotes", index, message);
         }
     }

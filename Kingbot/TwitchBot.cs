@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Threading.Tasks;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
+using TwitchLib.Api;
+using TwitchLib.Api.Services;
 using Kingbot.Commands;
 using Kingbot.Helpers.Security;
 using Kingbot.Helpers.Data;
-using System.Threading.Tasks;
+using Kingbot.Helpers.API;
 
 namespace Kingbot
 {
@@ -13,6 +16,8 @@ namespace Kingbot
     {
         // Make the client and channel have scope across all files
         public static TwitchClient client;
+        public static TwitchAPI api;
+        private static LiveStreamMonitorService Monitor;
         public static string channel;
 
         // From Program.cs. Starts the bot
@@ -25,17 +30,21 @@ namespace Kingbot
         /*
          * Flow:
          * 1. Create a new TwitchClient instance
-         * 2. Read the credentials from CredentialsHelper
-         * 3. Connect to the Database
-         * 4. Set all credentials and the channel variable
-         * 5. Start our client and listen to events
+         * 2. Create a new API client instance
+         * 3. Read the credentials from CredentialsHelper
+         * 4. Connect to the Database
+         * 5. Startup the API monitor service
+         * 6. Set all credentials and the channel variable
+         * 7. Start our client and listen to events
          */
         private static async Task Connect(string CredsPath)
         {
             bool logging = false;
             client = new TwitchClient();
+            api = new TwitchAPI();
             await CredentialsHelper.ReadCreds(CredsPath);
             DataHelper.InitDB();
+            await Task.Run(() => StartApi());
             ConnectionCredentials credentials = new ConnectionCredentials(CredentialsHelper.BotUsername, CredentialsHelper.BotToken);
             channel = CredentialsHelper.Channel;
             Console.WriteLine("Connecting...");
@@ -49,6 +58,33 @@ namespace Kingbot
 
             client.Connect();
             Console.WriteLine($"Connected to {channel}");
+        }
+
+        /*
+         * Put the API handler here since we're starting it in
+         * the same file and we can easily access this file if we
+         * need to edit any code.
+         * 
+         * Pass all events to the ApiHelper which interprets
+         * them to clean up any cruft.
+         */
+        public static async Task StartApi()
+        {
+            api.Settings.ClientId = CredentialsHelper.ApiId;
+            api.Settings.AccessToken = CredentialsHelper.ApiToken;
+
+            Console.WriteLine("Starting API service...");
+
+            Monitor = new LiveStreamMonitorService(api, 60);
+
+            Monitor.SetChannelsByName(ChannelProvider.GetChannels());
+
+            Monitor.OnStreamOnline += ApiHelper.OnStreamOnline;
+            Monitor.OnStreamOffline += ApiHelper.OnStreamOffline;
+
+            Monitor.Start();
+
+            Console.WriteLine("Api service started.");
         }
 
         // If there's an error, log it.
@@ -71,7 +107,10 @@ namespace Kingbot
                 Console.WriteLine($"Command Recieved: {e.ChatMessage.Message}");
                 try
                 {
-                    await CommandHandler.HandleCommand(e.ChatMessage.Message);
+                    if (e.ChatMessage.IsModerator)
+                        await CommandHandler.HandleCommand(e.ChatMessage.Message, true);
+                    else
+                        await CommandHandler.HandleCommand(e.ChatMessage.Message, false);
                 }
                 catch
                 {

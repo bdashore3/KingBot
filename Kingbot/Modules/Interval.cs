@@ -51,8 +51,10 @@ namespace Kingbot.Modules
          * 1. Store the name and the interval timer inside the dictionary for easy access
          * 2. Set the interval's ms, event, and start it
          * 3. Keep posting a message to the channel until the stop command is executed
+         * 
+         * Public function due to API access for stream starts
          */
-        private static async Task StartInterval(string name, int ms)
+        public static async Task StartInterval(string name, int ms)
         {
             string message = await DataHelper.Read("intervals", name);
             intervals[name] = new Timer(ms);
@@ -66,8 +68,12 @@ namespace Kingbot.Modules
             TwitchBot.client.SendMessage(TwitchBot.channel, message);
         }
 
-        // Stops already existing interval message. Checks if the interval even exists
-        private static void StopInterval(string name)
+        /*
+         * Stops already existing interval message.
+         * Public function due to API access for stream starts
+         */
+
+        public static void StopInterval(string name)
         {
             if (intervals.ContainsKey(name))
                 intervals[name].Stop();
