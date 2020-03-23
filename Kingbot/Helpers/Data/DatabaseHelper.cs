@@ -1,46 +1,42 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kingbot.Helpers.Data
 {
-    class DataCommands
+    public class DatabaseHelper<T> where T : class, IDbIndexed
     {
         private readonly KingBotContext _context;
-        public DataCommands(KingBotContext context)
+        public DatabaseHelper(KingBotContext context)
         {
             _context = context;
         }
-        public async Task WriteCommand(Command FileToAdd)
+
+        public async Task Write(T FileToAdd)
         {
             _context.Add(FileToAdd);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<string> ReadCommand(string index)
+        public async Task<string> Read(string index)
         {
-            var result = _context.Commands
+            var result = _context.Set<T>()
                 .FirstOrDefault(q => q.Index == index);
             if (result != null)
                 return result.Message;
             return null;
         }
 
-        public async Task DeleteCommand(string index)
+        public async Task Delete(string index)
         {
-            var key = _context.Commands
+            var key = _context.Set<T>()
                 .FirstOrDefault(q => q.Index == index);
             _context.Remove(key);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> EnsureCommand(string index)
+        public async Task<bool> Ensure(string index)
         {
-            if (await ReadCommand(index) != null)
-            {
-                return true;
-            }
-            return false;
+            return _context.Set<T>().Any(q => q.Index == index);
         }
     }
 }

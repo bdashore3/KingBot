@@ -1,16 +1,16 @@
-﻿using Kingbot.Helpers.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
+using Kingbot.Helpers.Data;
 
 namespace Kingbot.Modules
 {
     class Intervals
     {
-        private readonly DataIntervals _data;
-        
-        public Intervals(DataIntervals data)
+        // For dependency injection
+        private readonly DatabaseHelper<Interval> _data;
+        public Intervals(DatabaseHelper<Interval> data)
         {
             _data = data;
         }
@@ -37,7 +37,7 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    if (await _data.EnsureInterval(name))
+                    if (await _data.Ensure(name))
                     {
                         TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {name} already exists!");
                         break;
@@ -45,7 +45,7 @@ namespace Kingbot.Modules
                     await AddInterval(name, message);
                     break;
                 case "remove":
-                    await _data.DeleteInterval(name);
+                    await _data.Delete(name);
                     TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted interval message {name}!");
                     break;
             }
@@ -59,7 +59,7 @@ namespace Kingbot.Modules
                 Index = name,
                 Message = message
             };
-            await _data.WriteInterval(FileToAdd);
+            await _data.Write(FileToAdd);
             TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {name} written!");
         }
 
@@ -73,7 +73,7 @@ namespace Kingbot.Modules
          */
         public async Task StartInterval(string name, int ms)
         {
-            string message = await _data.ReadInterval(name);
+            string message = await _data.Read(name);
             intervals[name] = new Timer(ms);
             intervals[name].Elapsed += (sender, e) => OnTimedEvent(sender, message);
             intervals[name].AutoReset = true;

@@ -1,5 +1,4 @@
-﻿using System;
-using TwitchLib.Api.Services.Events.LiveStreamMonitor;
+﻿using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 
 namespace Kingbot.Helpers.API
 {

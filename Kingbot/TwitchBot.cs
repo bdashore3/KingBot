@@ -7,12 +7,7 @@ using TwitchLib.Api;
 using TwitchLib.Api.Services;
 using Kingbot.Commands;
 using Kingbot.Helpers.Security;
-using Kingbot.Helpers.Data;
 using Kingbot.Helpers.API;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
 
 namespace Kingbot
 {
@@ -21,6 +16,8 @@ namespace Kingbot
         // Make the client and channel have scope across all files
         public static TwitchClient client;
         public static TwitchAPI api;
+
+        // Variables for Dependency injection
         private static LiveStreamMonitorService Monitor;
         public static string channel;
         private readonly CommandHandler _commandHandler;
@@ -33,7 +30,7 @@ namespace Kingbot
         // From Program.cs. Starts the bot
         public async Task Start(string CredsPath)
         {
-            await Connect(CredsPath);
+            await Connect();
             await Task.Delay(-1);
         }
 
@@ -47,12 +44,11 @@ namespace Kingbot
          * 6. Set all credentials and the channel variable
          * 7. Start our client and listen to events
          */
-        private async Task Connect(string CredsPath)
+        private async Task Connect()
         {
             bool logging = false;
             client = new TwitchClient();
             api = new TwitchAPI();
-            CredentialsHelper.ReadCreds(CredsPath);
             await Task.Run(() => StartApi());
             ConnectionCredentials credentials = new ConnectionCredentials(CredentialsHelper.BotUsername, CredentialsHelper.BotToken);
             channel = CredentialsHelper.Channel;

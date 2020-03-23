@@ -8,11 +8,13 @@ namespace Kingbot.Modules
 {
     class Quotes
     {
-        private readonly DataQuotes _data;
-        public Quotes(DataQuotes data)
+        // For dependency injection
+        private readonly DatabaseHelper<Quote> _data;
+        public Quotes(DatabaseHelper<Quote> data)
         {
             _data = data;
         }
+
         /*
          * Handles all quote related commands
          * Links up to the Postgres database for reading
@@ -33,7 +35,7 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    if (await _data.EnsureQuote(index))
+                    if (await _data.Ensure(index))
                     {
                         TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} already exists!");
                         break;
@@ -43,14 +45,9 @@ namespace Kingbot.Modules
                 case "remove":
                     if (!CredentialsHelper.CheckAdmin(IsMod))
                         break;
-                    await _data.DeleteQuote(index);
+                    await _data.Delete(index);
                     TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} successfully deleted!");
                     break;
-                /*
-                case "list":
-                    await List("0");
-                    break;
-                */
             }
         }
 
@@ -61,7 +58,7 @@ namespace Kingbot.Modules
 
         private async Task<string> ReturnQuote(string index)
         {
-            var result = await _data.ReadQuote(index);
+            var result = await _data.Read(index);
 
             if (result == null)
                 return $"Quote {index} doesn't exist! Try adding it?";
@@ -73,10 +70,8 @@ namespace Kingbot.Modules
         /*
          * Add a new quote into the database
          * 
-         * TODO: Use the EnsureQuote check to see if the quote exists
-         * already to prevent overwriting.
-         * 
-         * Quotes cannot be updated unless executed by an admin
+         * Quotes cannot be updated, they have to be removed first
+         * by an admin.
          */
 
         private async Task AddQuote(string index, string message)
@@ -86,22 +81,8 @@ namespace Kingbot.Modules
                 Index = index,
                 Message = message
             };
-            await _data.WriteQuote(FileToAdd);
+            await _data.Write(FileToAdd);
             TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} successfully written!");
         }
-
-        /*
-        private static async Task List(string index)
-        {
-            int i = 1;
-            int DataLength = await DataHelper.GetLength();
-            while (i <= DataLength)
-            {
-                Console.WriteLine($"This is the {DataLength}");
-                Console.WriteLine(i + ": " + await DataHelper.Read("quotes", i.ToString()));
-                i++;
-            }
-        }
-        */
     }
 }

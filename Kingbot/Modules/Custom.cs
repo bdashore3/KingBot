@@ -7,11 +7,14 @@ namespace Kingbot.Modules
 {
     class Custom
     {
-        private readonly DataCommands _data;
-        public Custom(DataCommands data)
+        // For dependency injection
+        private readonly DatabaseHelper<Command> _data;
+        public Custom(DatabaseHelper<Command> data)
         {
             _data = data;
         }
+
+        // Handle the instruction from CommandHandler
         public async Task Handle(List<String> words, string username)
         {
             string instruction = words[1].ToLower();
@@ -22,7 +25,7 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    if (await _data.EnsureCommand(name))
+                    if (await _data.Ensure(name))
                     {
                         TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} already exists!");
                         break;
@@ -30,12 +33,13 @@ namespace Kingbot.Modules
                     await AddCommand(name, message);
                     break;
                 case "remove":
-                    await _data.DeleteCommand(name);
+                    await _data.Ensure(name);
                     TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} successfully deleted!");
                     break;
             }
         }
 
+        // Seperate method to add a command
         private async Task AddCommand(string name, string message)
         {
             Command FileToAdd = new Command
@@ -43,7 +47,7 @@ namespace Kingbot.Modules
                 Index = name,
                 Message = message
             };
-            await _data.WriteCommand(FileToAdd);
+            await _data.Write(FileToAdd);
             TwitchBot.client.SendMessage(TwitchBot.channel, $"New command {name} successfully written!");
         }
     }

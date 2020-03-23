@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kingbot.Helpers.Data;
@@ -12,14 +11,18 @@ namespace Kingbot.Commands
 {
     class CommandHandler
     {
+        // Global variables for use in the handler
         public static TwitchClient client = TwitchBot.client;
         public static string channel = TwitchBot.channel;
+
+        // Private variables for dependency injection references
         private readonly Quotes _quotes;
         private readonly Intervals _intervals;
         private readonly Custom _custom;
-        private readonly DataCommands _dataCommands;
+        private readonly DatabaseHelper<Command> _dataCommands;
 
-        public CommandHandler(Quotes quotes, Intervals intervals, Custom custom, DataCommands dataCommands)
+        // Since dependency injection is cascading, put a constructor here to assign variables.
+        public CommandHandler(Quotes quotes, Intervals intervals, Custom custom, DatabaseHelper<Command> dataCommands)
         {
             _quotes = quotes;
             _intervals = intervals;
@@ -92,8 +95,8 @@ namespace Kingbot.Commands
             }
 
             // If the command exists in custom commands, send the message
-            if (await _dataCommands.EnsureCommand(command))
-                TwitchBot.client.SendMessage(TwitchBot.channel, await _dataCommands.ReadCommand(command));
+            if (await _dataCommands.Ensure(command))
+                TwitchBot.client.SendMessage(TwitchBot.channel, await _dataCommands.Read(command));
         }
     }
 }

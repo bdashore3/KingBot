@@ -5,6 +5,5 @@
   "BotUsername": "",
   "Channel": "",
   "Prefix": "",
-  "AeroIP": "",
-  "SelfDB": ""
+  "DBConnection": ""
 }
