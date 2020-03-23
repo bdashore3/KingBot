@@ -3,13 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kingbot.Helpers.Data;
+using Kingbot.Helpers.Security;
 using Kingbot.Modules;
+using TwitchLib.Client;
+using TwitchLib.Client.Events;
 
 namespace Kingbot.Commands
 {
     class CommandHandler
     {
-        public static async Task HandleCommand(string og, bool IsMod)
+        public static TwitchClient client = TwitchBot.client;
+        public static string channel = TwitchBot.channel;
+        private readonly Quotes _quotes;
+        private readonly Intervals _intervals;
+        private readonly Custom _custom;
+        private readonly DataCommands _dataCommands;
+
+        public CommandHandler(Quotes quotes, Intervals intervals, Custom custom, DataCommands dataCommands)
+        {
+            _quotes = quotes;
+            _intervals = intervals;
+            _custom = custom;
+            _dataCommands = dataCommands;
+        }
+
+        // If a message contains the prefix, handle it. The try/catch is to prevent crashing of the program
+        public async void OnMessageReceived(object sender, OnMessageReceivedArgs e)
+        {
+            if (e.ChatMessage.Message.Contains(CredentialsHelper.Prefix))
+            {
+                try
+                {
+                    if (e.ChatMessage.IsModerator || e.ChatMessage.IsBroadcaster)
+                        await HandleCommand(e.ChatMessage.Message, e.ChatMessage.Username, e.ChatMessage.DisplayName, true);
+                    else
+                        await HandleCommand(e.ChatMessage.Message, e.ChatMessage.Username, e.ChatMessage.DisplayName, false);
+                }
+                catch
+                {
+                    client.SendMessage(channel, "This command syntax doesn't work! Check the help?");
+                }
+            }
+        }
+
+        private async Task HandleCommand(string og, string username, string displayName, bool IsMod)
         {
             /*
              * Flow:
@@ -38,37 +75,25 @@ namespace Kingbot.Commands
                     break;
 
                 case "quote":
-                    await Quotes.Handle(words, IsMod);
+                    await _quotes.Handle(words, username, IsMod);
                     break;
 
                 case "interval":
-                    if (IsMod)
-                    {
-                        await Interval.Handle(words);
+                    if (!CredentialsHelper.CheckAdmin(IsMod))
                         break;
-                    }
-                    else
-                    {
-                        TwitchBot.client.SendMessage(TwitchBot.channel, "You can't execute this command!");
-                        break;
-                    }
+                    await _intervals.Handle(words, username);
+                    break;
 
                 case "command":
-                    if (IsMod)
-                    {
-                        await Custom.Handle(words);
-                    }
-                    else
-                    {
-                        TwitchBot.client.SendMessage(TwitchBot.channel, "You can't execute this command!");
+                    if (!CredentialsHelper.CheckAdmin(IsMod))
                         break;
-                    }
+                    await _custom.Handle(words, username);
                     break;
             }
 
             // If the command exists in custom commands, send the message
-            if (await DataHelper.Ensure("commands", command))
-                TwitchBot.client.SendMessage(TwitchBot.channel, await DataHelper.Read("commands", command));
+            if (await _dataCommands.EnsureCommand(command))
+                TwitchBot.client.SendMessage(TwitchBot.channel, await _dataCommands.ReadCommand(command));
         }
     }
 }

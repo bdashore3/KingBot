@@ -13,8 +13,7 @@ namespace Kingbot.Helpers.Security
         public static string Channel { get; private set; }
         public static string BotUsername { get; private set; }
         public static string Prefix { get; private set; }
-        public static string AeroIP { get; private set; }
-        public static string SelfDB { get; private set; }
+        public static string DBConnection { get; private set; }
 
         // This struct might show warnings about no initialized value
         // It is assigned by the JSON read operation in ReadCreds()
@@ -39,20 +38,17 @@ namespace Kingbot.Helpers.Security
             [JsonProperty("Prefix")]
             public string Prefix;
 
-            [JsonProperty("AeroIP")]
-            public string AeroIP;
-
-            [JsonProperty("SelfDB")]
-            public string SelfDB;
+            [JsonProperty("DBConnection")]
+            public string DBConnection;
         }
 #pragma warning restore 0649
-        public static async Task<bool> ReadCreds(string path)
+        public static bool ReadCreds(string path)
         {
             // Read credentials as Token and DevID into a struct object from creds.json
             string info = "";
             using (FileStream fs = File.OpenRead(path))
             using (StreamReader sr = new StreamReader(fs))
-                info = await sr.ReadToEndAsync();
+                info = sr.ReadToEnd();
 
             CredsJson creds = JsonConvert.DeserializeObject<CredsJson>(info);
             BotToken = creds.BotToken;
@@ -61,16 +57,23 @@ namespace Kingbot.Helpers.Security
             Channel = creds.Channel;
             BotUsername = creds.BotUsername;
             Prefix = creds.Prefix;
-            AeroIP = creds.AeroIP;
-            SelfDB = creds.SelfDB;
+            DBConnection = creds.DBConnection;
             return true;
         }
 
         // Empty the tokens from RAM once we've authenticated
-        public static void WipeToken()
+        public void WipeToken()
         {
             BotToken = "";
             ApiToken = "";
+        }
+
+        public static bool CheckAdmin(bool IsMod)
+        {
+            if (IsMod)
+                return true;
+            TwitchBot.client.SendMessage(TwitchBot.channel, "You can't execute this command!");
+            return false;
         }
 
     }

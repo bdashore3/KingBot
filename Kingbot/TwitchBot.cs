@@ -9,6 +9,10 @@ using Kingbot.Commands;
 using Kingbot.Helpers.Security;
 using Kingbot.Helpers.Data;
 using Kingbot.Helpers.API;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kingbot
 {
@@ -19,9 +23,15 @@ namespace Kingbot
         public static TwitchAPI api;
         private static LiveStreamMonitorService Monitor;
         public static string channel;
+        private readonly CommandHandler _commandHandler;
+
+        public TwitchBot(CommandHandler commandHandler)
+        {
+            _commandHandler = commandHandler;
+        }
 
         // From Program.cs. Starts the bot
-        public static async Task Start(string CredsPath)
+        public async Task Start(string CredsPath)
         {
             await Connect(CredsPath);
             await Task.Delay(-1);
@@ -37,13 +47,12 @@ namespace Kingbot
          * 6. Set all credentials and the channel variable
          * 7. Start our client and listen to events
          */
-        private static async Task Connect(string CredsPath)
+        private async Task Connect(string CredsPath)
         {
             bool logging = false;
             client = new TwitchClient();
             api = new TwitchAPI();
-            await CredentialsHelper.ReadCreds(CredsPath);
-            DataHelper.InitDB();
+            CredentialsHelper.ReadCreds(CredsPath);
             await Task.Run(() => StartApi());
             ConnectionCredentials credentials = new ConnectionCredentials(CredentialsHelper.BotUsername, CredentialsHelper.BotToken);
             channel = CredentialsHelper.Channel;
@@ -54,7 +63,7 @@ namespace Kingbot
                 client.OnLog += Client_OnLog;
 
             client.OnConnectionError += Client_OnConnectionError;
-            client.OnMessageReceived += Client_OnMessageReceived;
+            client.OnMessageReceived += _commandHandler.OnMessageReceived;
 
             client.Connect();
             Console.WriteLine($"Connected to {channel}");
@@ -68,19 +77,21 @@ namespace Kingbot
          * Pass all events to the ApiHelper which interprets
          * them to clean up any cruft.
          */
-        public static async Task StartApi()
+        public async Task StartApi()
         {
             api.Settings.ClientId = CredentialsHelper.ApiId;
             api.Settings.AccessToken = CredentialsHelper.ApiToken;
 
             Console.WriteLine("Starting API service...");
 
+            ApiHelper apiHelper = new ApiHelper();
+
             Monitor = new LiveStreamMonitorService(api, 60);
 
             Monitor.SetChannelsByName(ChannelProvider.GetChannels());
 
-            Monitor.OnStreamOnline += ApiHelper.OnStreamOnline;
-            Monitor.OnStreamOffline += ApiHelper.OnStreamOffline;
+            Monitor.OnStreamOnline += apiHelper.OnStreamOnline;
+            Monitor.OnStreamOffline += apiHelper.OnStreamOffline;
 
             Monitor.Start();
 
@@ -88,34 +99,15 @@ namespace Kingbot
         }
 
         // If there's an error, log it.
-        private static void Client_OnConnectionError(object sender, OnConnectionErrorArgs e)
+        private void Client_OnConnectionError(object sender, OnConnectionErrorArgs e)
         {
             Console.WriteLine($"Error! {e.Error}");
         }
 
         // If logging is enabled in Connect(), put logs in console
-        private static void Client_OnLog(object sender, OnLogArgs e)
+        private void Client_OnLog(object sender, OnLogArgs e)
         {
             Console.WriteLine(e.Data);
-        }
-
-        // If a message contains the prefix, handle it. The try/catch is to prevent crashing of the program
-        private static async void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
-        {
-            if (e.ChatMessage.Message.Contains(CredentialsHelper.Prefix))
-            {
-                try
-                {
-                    if (e.ChatMessage.IsModerator || e.ChatMessage.IsBroadcaster)
-                        await CommandHandler.HandleCommand(e.ChatMessage.Message, true);
-                    else
-                        await CommandHandler.HandleCommand(e.ChatMessage.Message, false);
-                }
-                catch
-                {
-                    client.SendMessage(channel, "This command syntax doesn't work! Check the help?");
-                }
-            }
         }
     }
 }

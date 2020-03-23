@@ -7,7 +7,12 @@ namespace Kingbot.Modules
 {
     class Custom
     {
-        public static async Task Handle(List<String> words)
+        private readonly DataCommands _data;
+        public Custom(DataCommands data)
+        {
+            _data = data;
+        }
+        public async Task Handle(List<String> words, string username)
         {
             string instruction = words[1].ToLower();
             string name = words[2];
@@ -17,7 +22,7 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    if (await DataHelper.Ensure("commands", name))
+                    if (await _data.EnsureCommand(name))
                     {
                         TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} already exists!");
                         break;
@@ -25,15 +30,20 @@ namespace Kingbot.Modules
                     await AddCommand(name, message);
                     break;
                 case "remove":
-                    await DataHelper.Delete("commands", name);
+                    await _data.DeleteCommand(name);
                     TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} successfully deleted!");
                     break;
             }
         }
 
-        private static async Task AddCommand(string name, string message)
+        private async Task AddCommand(string name, string message)
         {
-            await DataHelper.Write("commands", name, message);
+            Command FileToAdd = new Command
+            {
+                Index = name,
+                Message = message
+            };
+            await _data.WriteCommand(FileToAdd);
             TwitchBot.client.SendMessage(TwitchBot.channel, $"New command {name} successfully written!");
         }
     }

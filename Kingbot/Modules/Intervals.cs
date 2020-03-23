@@ -6,13 +6,20 @@ using System.Timers;
 
 namespace Kingbot.Modules
 {
-    class Interval
+    class Intervals
     {
+        private readonly DataIntervals _data;
+        
+        public Intervals(DataIntervals data)
+        {
+            _data = data;
+        }
+
         // Dictionary for storing all the timers. This is the heart of the interval system
-        private static Dictionary<string, Timer> intervals = new Dictionary<string, Timer>();
+        private Dictionary<string, Timer> intervals = new Dictionary<string, Timer>();
 
         // Handles command string given from the CommandHandler
-        public static async Task Handle(List<String> words)
+        public async Task Handle(List<String> words, string username)
         {
             string instruction = words[1].ToLower();
             string name = words[2];
@@ -30,7 +37,7 @@ namespace Kingbot.Modules
                 case "add":
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    if (await DataHelper.Ensure("intervals", name))
+                    if (await _data.EnsureInterval(name))
                     {
                         TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {name} already exists!");
                         break;
@@ -38,18 +45,21 @@ namespace Kingbot.Modules
                     await AddInterval(name, message);
                     break;
                 case "remove":
-                    await DataHelper.Delete("intervals", name);
-                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted the interval message: {name}!");
+                    await _data.DeleteInterval(name);
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted interval message {name}!");
                     break;
             }
         }
 
         // Add a new interval phrase and message into the database
-        
-        // TODO: Add ensure check
-        private static async Task AddInterval(string name, string message)
+        private async Task AddInterval(string name, string message)
         {
-            await DataHelper.Write("intervals", name, message);
+            Interval FileToAdd = new Interval
+            {
+                Index = name,
+                Message = message
+            };
+            await _data.WriteInterval(FileToAdd);
             TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {name} written!");
         }
 
@@ -61,16 +71,16 @@ namespace Kingbot.Modules
          * 
          * Public function due to API access for stream starts
          */
-        public static async Task StartInterval(string name, int ms)
+        public async Task StartInterval(string name, int ms)
         {
-            string message = await DataHelper.Read("intervals", name);
+            string message = await _data.ReadInterval(name);
             intervals[name] = new Timer(ms);
             intervals[name].Elapsed += (sender, e) => OnTimedEvent(sender, message);
             intervals[name].AutoReset = true;
             intervals[name].Start();
         }
 
-        private static void OnTimedEvent(object sender, string message)
+        private void OnTimedEvent(object sender, string message)
         {
             TwitchBot.client.SendMessage(TwitchBot.channel, message);
         }
@@ -80,7 +90,7 @@ namespace Kingbot.Modules
          * Public function due to API access for stream starts
          */
 
-        public static void StopInterval(string name)
+        public void StopInterval(string name)
         {
             if (intervals.ContainsKey(name))
                 intervals[name].Stop();
