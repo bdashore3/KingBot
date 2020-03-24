@@ -11,5 +11,10 @@
         {
             TwitchBot.client.SendMessage(channel, "Pong!");
         }
+
+        public static void Shoutout(string username)
+        {
+            TwitchBot.client.SendMessage(channel, $"Hey! This streamer is cool! Go support at: https://twitch.tv/{username}");
+        }
     }
 }

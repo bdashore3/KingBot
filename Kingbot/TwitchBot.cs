@@ -8,6 +8,7 @@ using TwitchLib.Api.Services;
 using Kingbot.Commands;
 using Kingbot.Helpers.Security;
 using Kingbot.Helpers.API;
+using TwitchLib.Api.Services.Events;
 
 namespace Kingbot
 {
@@ -19,6 +20,7 @@ namespace Kingbot
 
         // Variables for Dependency injection
         private static LiveStreamMonitorService Monitor;
+        private static FollowerService FollowMonitor;
         public static string channel;
         private readonly CommandHandler _commandHandler;
 
@@ -48,8 +50,9 @@ namespace Kingbot
         {
             bool logging = false;
             client = new TwitchClient();
+            ApiHelper apiHelper = new ApiHelper();
             api = new TwitchAPI();
-            await Task.Run(() => StartApi());
+            await Task.Run(() => StartApi(apiHelper));
             ConnectionCredentials credentials = new ConnectionCredentials(CredentialsHelper.BotUsername, CredentialsHelper.BotToken);
             channel = CredentialsHelper.Channel;
             Console.WriteLine("Connecting...");
@@ -60,6 +63,12 @@ namespace Kingbot
 
             client.OnConnectionError += Client_OnConnectionError;
             client.OnMessageReceived += _commandHandler.OnMessageReceived;
+
+            client.OnNewSubscriber += apiHelper.OnNewSubscriber;
+            client.OnReSubscriber += apiHelper.OnReSubscriber;
+            client.OnGiftedSubscription += apiHelper.OnGiftedSubscription;
+            client.OnAnonGiftedSubscription += apiHelper.OnAnonGiftedSubscription;
+            client.OnBeingHosted += apiHelper.OnBeingHosted;
 
             client.Connect();
             Console.WriteLine($"Connected to {channel}");
@@ -73,25 +82,30 @@ namespace Kingbot
          * Pass all events to the ApiHelper which interprets
          * them to clean up any cruft.
          */
-        public async Task StartApi()
+        public async Task StartApi(ApiHelper apiHelper)
         {
             api.Settings.ClientId = CredentialsHelper.ApiId;
             api.Settings.AccessToken = CredentialsHelper.ApiToken;
 
-            Console.WriteLine("Starting API service...");
-
-            ApiHelper apiHelper = new ApiHelper();
+            Console.WriteLine("Starting services...");
 
             Monitor = new LiveStreamMonitorService(api, 60);
+            FollowMonitor = new FollowerService(api);
 
             Monitor.SetChannelsByName(ChannelProvider.GetChannels());
+            FollowMonitor.SetChannelsByName(ChannelProvider.GetChannels());
 
+            Monitor.OnServiceStarted += StreamMonitor_OnServiceStarted;
             Monitor.OnStreamOnline += apiHelper.OnStreamOnline;
             Monitor.OnStreamOffline += apiHelper.OnStreamOffline;
 
+            FollowMonitor.OnServiceStarted += FollowMonitor_OnServiceStarted;
+            FollowMonitor.OnNewFollowersDetected += apiHelper.OnNewFollow;
+
+            FollowMonitor.Start();
             Monitor.Start();
 
-            Console.WriteLine("Api service started.");
+            Console.WriteLine("Services are started.");
         }
 
         // If there's an error, log it.
@@ -104,6 +118,16 @@ namespace Kingbot
         private void Client_OnLog(object sender, OnLogArgs e)
         {
             Console.WriteLine(e.Data);
+        }
+
+        public void StreamMonitor_OnServiceStarted(object sender, OnServiceStartedArgs e)
+        {
+            Console.WriteLine("Stream Monitor service started!");
+        }
+
+        public void FollowMonitor_OnServiceStarted(object sender, OnServiceStartedArgs e)
+        {
+            Console.WriteLine("Follow service started!");
         }
     }
 }

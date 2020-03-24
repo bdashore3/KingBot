@@ -92,6 +92,13 @@ namespace Kingbot.Commands
                         break;
                     await _custom.Handle(words, username);
                     break;
+
+                case "so":
+                case "shoutout":
+                    if (!CredentialsHelper.CheckAdmin(IsMod))
+                        break;
+                    Other.Shoutout(displayName);
+                    break;
             }
 
             // If the command exists in custom commands, send the message
