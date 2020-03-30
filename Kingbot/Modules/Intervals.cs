@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
@@ -16,37 +17,44 @@ namespace Kingbot.Modules
         }
 
         // Dictionary for storing all the timers. This is the heart of the interval system
-        private Dictionary<string, Timer> intervals = new Dictionary<string, Timer>();
+        private ConcurrentDictionary<string, Timer> intervals = new ConcurrentDictionary<string, Timer>();
 
         // Handles command string given from the CommandHandler
         public async Task Handle(List<String> words, string username)
         {
-            string instruction = words[1].ToLower();
-            string name = words[2];
-
-            switch (instruction)
+            switch (words[1].ToLower())
             {
                 case "start":
                     string ms = words[3];
 
-                    await StartInterval(name, int.Parse(ms));
-                    break;
-                case "stop":
-                    StopInterval(name);
-                    break;
-                case "add":
-                    words.RemoveRange(0, 3);
-                    string message = String.Join(" ", words.ToArray());
-                    if (await _data.Ensure(name))
+                    if (!await _data.Ensure(words[2]))
                     {
-                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {name} already exists!");
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {words[2]} doesn't exist! Try adding it?");
                         break;
                     }
-                    await AddInterval(name, message);
+                    await StartInterval(words[2], int.Parse(ms));
+                    break;
+                case "stop":
+                    StopInterval(words[2]);
+                    break;
+                case "add":
+                    string addIndex = words[2];
+                    words.RemoveRange(0, 3);
+                    string message = String.Join(" ", words.ToArray());
+
+                    if (await _data.Ensure(addIndex))
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval message {addIndex} already exists!");
+                        break;
+                    }
+                    await AddInterval(addIndex, message);
                     break;
                 case "remove":
-                    await _data.Delete(name);
-                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted interval message {name}!");
+                    await _data.Delete(words[2]);
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Deleted interval message {words[2]}!");
+                    break;
+                case "list":
+                    await _data.GetList("Intervals", username);
                     break;
             }
         }
@@ -93,9 +101,12 @@ namespace Kingbot.Modules
         public void StopInterval(string name)
         {
             if (intervals.ContainsKey(name))
+            {
                 intervals[name].Stop();
+                intervals.TryRemove(name, out Timer value);
+            }
             else
-                TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval {name}! Perhaps you never started it?");
+                TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval {name} doesn't exist! Perhaps you never started it?");
         }
     }
 }

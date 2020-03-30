@@ -20,14 +20,16 @@ namespace Kingbot.Commands
         private readonly Intervals _intervals;
         private readonly Custom _custom;
         private readonly DatabaseHelper<Command> _dataCommands;
+        private readonly Lurk _lurk;
 
         // Since dependency injection is cascading, put a constructor here to assign variables.
-        public CommandHandler(Quotes quotes, Intervals intervals, Custom custom, DatabaseHelper<Command> dataCommands)
+        public CommandHandler(Quotes quotes, Intervals intervals, Custom custom, DatabaseHelper<Command> dataCommands, Lurk lurk)
         {
             _quotes = quotes;
             _intervals = intervals;
             _custom = custom;
             _dataCommands = dataCommands;
+            _lurk = lurk;
         }
 
         // If a message contains the prefix, handle it. The try/catch is to prevent crashing of the program
@@ -37,10 +39,8 @@ namespace Kingbot.Commands
             {
                 try
                 {
-                    if (e.ChatMessage.IsModerator || e.ChatMessage.IsBroadcaster)
-                        await HandleCommand(e.ChatMessage.Message, e.ChatMessage.Username, e.ChatMessage.DisplayName, true);
-                    else
-                        await HandleCommand(e.ChatMessage.Message, e.ChatMessage.Username, e.ChatMessage.DisplayName, false);
+                    bool IsMod = e.ChatMessage.IsModerator || e.ChatMessage.IsBroadcaster;
+                    await HandleCommand(e.ChatMessage.Message, e.ChatMessage.Username, e.ChatMessage.DisplayName, e.ChatMessage.Id, IsMod);
                 }
                 catch
                 {
@@ -49,7 +49,7 @@ namespace Kingbot.Commands
             }
         }
 
-        private async Task HandleCommand(string og, string username, string displayName, bool IsMod)
+        private async Task HandleCommand(string og, string username, string displayName, string Id, bool IsMod)
         {
             /*
              * Flow:
@@ -71,6 +71,7 @@ namespace Kingbot.Commands
              * 
              * TODO: Add checks for administrators (Moderators)
              */
+
             switch (command)
             {
                 case "ping":
@@ -78,26 +79,30 @@ namespace Kingbot.Commands
                     break;
 
                 case "quote":
-                    await _quotes.Handle(words, username, IsMod);
+                    await _quotes.Handle(words, username, IsMod, Id);
                     break;
 
                 case "interval":
-                    if (!CredentialsHelper.CheckAdmin(IsMod))
+                    if (!CredentialsHelper.CheckAdmin(IsMod, Id))
                         break;
                     await _intervals.Handle(words, username);
                     break;
 
                 case "command":
-                    if (!CredentialsHelper.CheckAdmin(IsMod))
+                    if (!CredentialsHelper.CheckAdmin(IsMod, Id))
                         break;
                     await _custom.Handle(words, username);
                     break;
 
                 case "so":
                 case "shoutout":
-                    if (!CredentialsHelper.CheckAdmin(IsMod))
+                    if (!CredentialsHelper.CheckAdmin(IsMod, Id))
                         break;
                     Other.Shoutout(displayName);
+                    break;
+
+                case "lurk":
+                    _lurk.Handle(words, displayName);
                     break;
             }
 

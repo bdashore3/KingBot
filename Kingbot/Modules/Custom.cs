@@ -17,24 +17,26 @@ namespace Kingbot.Modules
         // Handle the instruction from CommandHandler
         public async Task Handle(List<String> words, string username)
         {
-            string instruction = words[1].ToLower();
-            string name = words[2];
-
-            switch (instruction)
+            switch (words[1].ToLower())
             {
                 case "add":
+                    string addIndex = words[2];
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    if (await _data.Ensure(name))
+
+                    if (await _data.Ensure(addIndex))
                     {
-                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} already exists!");
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {addIndex} already exists!");
                         break;
                     }
-                    await AddCommand(name, message);
+                    await AddCommand(addIndex, message);
                     break;
                 case "remove":
-                    await _data.Ensure(name);
-                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {name} successfully deleted!");
+                    await _data.Ensure(words[2]);
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {words[2]} successfully deleted!");
+                    break;
+                case "list":
+                    await _data.GetList("Commands", username);
                     break;
             }
         }

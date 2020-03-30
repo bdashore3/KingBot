@@ -1,4 +1,9 @@
-﻿using System.Linq;
+﻿using Kingbot.Helpers.Security;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kingbot.Helpers.Data
@@ -13,30 +18,40 @@ namespace Kingbot.Helpers.Data
 
         public async Task Write(T FileToAdd)
         {
-            _context.Add(FileToAdd);
+            await _context.AddAsync(FileToAdd);
             await _context.SaveChangesAsync();
         }
 
         public async Task<string> Read(string index)
         {
-            var result = _context.Set<T>()
-                .FirstOrDefault(q => q.Index == index);
-            if (result != null)
-                return result.Message;
-            return null;
+            var result = await _context.Set<T>()
+                .FirstOrDefaultAsync(q => q.Index == index);
+            return result?.Message;
         }
 
         public async Task Delete(string index)
         {
-            var key = _context.Set<T>()
-                .FirstOrDefault(q => q.Index == index);
+            var key = await _context.Set<T>()
+                .FirstOrDefaultAsync(q => q.Index == index);
             _context.Remove(key);
             await _context.SaveChangesAsync();
         }
 
         public async Task<bool> Ensure(string index)
         {
-            return _context.Set<T>().Any(q => q.Index == index);
+            return await _context.Set<T>().AnyAsync(q => q.Index == index);
+        }
+
+        public async Task GetList(string type, string username)
+        {
+            var data = await _context.Set<T>().ToListAsync();
+            TwitchBot.client.SendWhisper(username, $"{type} List");
+            TwitchBot.client.SendWhisper(username, "---------------------------------------");
+            foreach (var i in data)
+            {
+                TwitchBot.client.SendWhisper(username, $"{i.Index}: {i.Message}");
+            }
+            TwitchBot.client.SendWhisper(username, "---------------------------------------");
         }
     }
 }

@@ -21,32 +21,39 @@ namespace Kingbot.Modules
          * and saying in the twitch client.
          */
 
-        public async Task Handle(List<string> words, string username, bool IsMod)
+        public async Task Handle(List<string> words, string username, bool IsMod, string Id)
         {
-            string instruction = words[1].ToLower();
-            string index = words[2];
-
-
-            switch (instruction)
+            switch (words[1].ToLower())
             {
                 case "retrieve":
-                    TwitchBot.client.SendMessage(TwitchBot.channel, await ReturnQuote(index));
+                    TwitchBot.client.SendMessage(TwitchBot.channel, await ReturnQuote(words[2]));
                     break;
                 case "add":
+                    string addIndex = words[2];
                     words.RemoveRange(0, 3);
                     string message = String.Join(" ", words.ToArray());
-                    if (await _data.Ensure(index))
+
+                    if (await _data.Ensure(addIndex))
                     {
-                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} already exists!");
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {addIndex} already exists!");
                         break;
                     }
-                    await AddQuote(index, message);
+                    await AddQuote(addIndex, message);
                     break;
                 case "remove":
-                    if (!CredentialsHelper.CheckAdmin(IsMod))
+                    if (!CredentialsHelper.CheckAdmin(IsMod, Id))
                         break;
-                    await _data.Delete(index);
-                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {index} successfully deleted!");
+
+                    if (await _data.Ensure(words[2]))
+                    {
+                        TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {words[2]} already exists!");
+                        break;
+                    }
+                    await _data.Delete(words[2]);
+                    TwitchBot.client.SendMessage(TwitchBot.channel, $"Quote {words[2]} successfully deleted!");
+                    break;
+                case "list":
+                    await _data.GetList("Quotes", username);
                     break;
             }
         }

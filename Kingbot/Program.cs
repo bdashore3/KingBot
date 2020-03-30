@@ -23,6 +23,7 @@ namespace Kingbot
             services.AddTransient<Quotes>();
             services.AddTransient<Intervals>();
             services.AddTransient<Custom>();
+            services.AddTransient<Lurk>();
             services.AddTransient<DatabaseHelper<Quote>>();
             services.AddTransient<DatabaseHelper<Interval>>();
             services.AddTransient<DatabaseHelper<Command>>();

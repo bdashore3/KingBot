@@ -67,10 +67,11 @@ namespace Kingbot.Helpers.Security
             ApiToken = "";
         }
 
-        public static bool CheckAdmin(bool IsMod)
+        public static bool CheckAdmin(bool IsMod, string Id)
         {
             if (IsMod)
                 return true;
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"/delete {Id}");
             TwitchBot.client.SendMessage(TwitchBot.channel, "You can't execute this command!");
             return false;
         }

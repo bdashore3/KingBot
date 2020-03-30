@@ -35,7 +35,7 @@ namespace Kingbot.Helpers.API
 
         public async void OnReSubscriber(object sender, OnReSubscriberArgs e)
         {
-            TwitchBot.client.SendMessage(TwitchBot.channel, $"Omigosh! {e.ReSubscriber.DisplayName} just resubscribed for {e.ReSubscriber.Months}! You're amazing!";
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"Omigosh! {e.ReSubscriber.DisplayName} just resubscribed for {e.ReSubscriber.Months}! You're amazing!");
         }
 
         public async void OnGiftedSubscription(object sender, OnGiftedSubscriptionArgs e)
