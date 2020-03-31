@@ -2,6 +2,11 @@
 
 This is an opensource twitch bot! It's mainly used for **kingbrigames's** twitch channel, but it's an easy to use bot which can be added on any channel!
 
+## Sunsetting JS
+
+I will be sunsetting the JS version of this bot due to the newer C# version. This branch will still be avaliable, but will no longer be updated. If you want updated
+features, please use the C# version of this bot.
+
 ## Command List
 
 All commands are in the comments of the king.js file, but here is a list if you're too lazy:
