@@ -1,4 +1,6 @@
-﻿using TwitchLib.Api.Services.Events.FollowerService;
+﻿using Kingbot.Modules;
+using System;
+using TwitchLib.Api.Services.Events.FollowerService;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using TwitchLib.Client.Events;
 
@@ -6,51 +8,52 @@ namespace Kingbot.Helpers.API
 {
     class ApiHelper
     {
+        private readonly Lurk _lurk;
+        private readonly Intervals _intervals;
+        public ApiHelper(Lurk lurk, Intervals intervals)
+        {
+            _lurk = lurk;
+            _intervals = intervals;
+        }
+
         // When the stream is online, do this
-        public async void OnStreamOnline(object sender, OnStreamOnlineArgs e)
+        public void OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
             TwitchBot.client.SendMessage(TwitchBot.channel, "The stream is LIVE! Get turnt!");
             // Add function calls here. Make sure to make them public!
         }
 
         // When the stream is offline, do this
-        public async void OnStreamOffline(object sender, OnStreamOfflineArgs e)
+        public void OnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
             TwitchBot.client.SendMessage(TwitchBot.channel, "We are now offline...");
+            _lurk.ClearLurkDict();
+            _intervals.ClearIntervalDict();
+
             // Same as above.
         }
 
-        public async void OnNewFollow(object sender, OnNewFollowersDetectedArgs e)
+        public void OnNewFollow(object sender, OnNewFollowersDetectedArgs e)
         {
             foreach (var follower in e.NewFollowers)
             {
-                TwitchBot.client.SendMessage(TwitchBot.channel, $"Hey {follower.ToUserName}! Thanks for the follow! I really appreciate it!");
+                Console.WriteLine($"Hey @{follower.FromUserName}! Thanks for the follow! I really appreciate it!");
             }
         }
 
-        public async void OnNewSubscriber(object sender, OnNewSubscriberArgs e)
+        public void OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
-            TwitchBot.client.SendMessage(TwitchBot.channel, $"Wow... {e.Subscriber.DisplayName} just subscribed for the first time! Enjoy the emotes and welcome!");
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"Wow... @{e.Subscriber.DisplayName} just subscribed for the first time! Enjoy the emotes and welcome!");
         }
 
-        public async void OnReSubscriber(object sender, OnReSubscriberArgs e)
+        public void OnReSubscriber(object sender, OnReSubscriberArgs e)
         {
-            TwitchBot.client.SendMessage(TwitchBot.channel, $"Omigosh! {e.ReSubscriber.DisplayName} just resubscribed for {e.ReSubscriber.Months}! You're amazing!");
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"Omigosh! @{e.ReSubscriber.DisplayName} just resubscribed for {e.ReSubscriber.Months}! You're amazing!");
         }
 
-        public async void OnGiftedSubscription(object sender, OnGiftedSubscriptionArgs e)
+        public void OnGiftedSubscription(object sender, OnGiftedSubscriptionArgs e)
         {
-            TwitchBot.client.SendMessage(TwitchBot.channel, $"Daaaaaaammmm! Thanks {e.GiftedSubscription.DisplayName} for the subs! You're a GOAT");
-        }
-
-        public async void OnAnonGiftedSubscription(object sender, OnAnonGiftedSubscriptionArgs e)
-        {
-            TwitchBot.client.SendMessage(TwitchBot.channel, "Daaaaaaammmm! Thanks for the subs! Even though you're anonymous, you're still appreciated!");
-        }
-
-        public async void OnBeingHosted(object sender, OnBeingHostedArgs e)
-        {
-            TwitchBot.client.SendMessage(TwitchBot.channel, $"Heya! Thanks for the host {e.BeingHostedNotification.HostedByChannel}!");
+            TwitchBot.client.SendMessage(TwitchBot.channel, $"Daaaaaaammmm! Thanks @{e.GiftedSubscription.DisplayName} for the subs! You're a GOAT");
         }
     }
 }

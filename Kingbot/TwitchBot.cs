@@ -23,16 +23,18 @@ namespace Kingbot
         private static FollowerService FollowMonitor;
         public static string channel;
         private readonly CommandHandler _commandHandler;
+        private readonly ApiHelper _apiHelper;
 
-        public TwitchBot(CommandHandler commandHandler)
+        public TwitchBot(CommandHandler commandHandler, ApiHelper apiHelper)
         {
             _commandHandler = commandHandler;
+            _apiHelper = apiHelper;
         }
 
         // From Program.cs. Starts the bot
-        public async Task Start(string CredsPath)
+        public async Task Start()
         {
-            await Connect();
+            Connect();
             await Task.Delay(-1);
         }
 
@@ -46,13 +48,12 @@ namespace Kingbot
          * 6. Set all credentials and the channel variable
          * 7. Start our client and listen to events
          */
-        private async Task Connect()
+        private void Connect()
         {
             bool logging = false;
             client = new TwitchClient();
-            ApiHelper apiHelper = new ApiHelper();
             api = new TwitchAPI();
-            await Task.Run(() => StartApi(apiHelper));
+            StartApi();
             ConnectionCredentials credentials = new ConnectionCredentials(CredentialsHelper.BotUsername, CredentialsHelper.BotToken);
             channel = CredentialsHelper.Channel;
             Console.WriteLine("Connecting...");
@@ -64,11 +65,9 @@ namespace Kingbot
             client.OnConnectionError += Client_OnConnectionError;
             client.OnMessageReceived += _commandHandler.OnMessageReceived;
 
-            client.OnNewSubscriber += apiHelper.OnNewSubscriber;
-            client.OnReSubscriber += apiHelper.OnReSubscriber;
-            client.OnGiftedSubscription += apiHelper.OnGiftedSubscription;
-            client.OnAnonGiftedSubscription += apiHelper.OnAnonGiftedSubscription;
-            client.OnBeingHosted += apiHelper.OnBeingHosted;
+            client.OnNewSubscriber += _apiHelper.OnNewSubscriber;
+            client.OnReSubscriber += _apiHelper.OnReSubscriber;
+            client.OnGiftedSubscription += _apiHelper.OnGiftedSubscription;
 
             client.Connect();
             Console.WriteLine($"Connected to {channel}");
@@ -82,7 +81,7 @@ namespace Kingbot
          * Pass all events to the ApiHelper which interprets
          * them to clean up any cruft.
          */
-        public async Task StartApi(ApiHelper apiHelper)
+        private void StartApi()
         {
             api.Settings.ClientId = CredentialsHelper.ApiId;
             api.Settings.AccessToken = CredentialsHelper.ApiToken;
@@ -92,17 +91,22 @@ namespace Kingbot
             Monitor = new LiveStreamMonitorService(api, 60);
             FollowMonitor = new FollowerService(api);
 
+            // This stops follower spam on startup
+
+
             Monitor.SetChannelsByName(ChannelProvider.GetChannels());
             FollowMonitor.SetChannelsByName(ChannelProvider.GetChannels());
 
             Monitor.OnServiceStarted += StreamMonitor_OnServiceStarted;
-            Monitor.OnStreamOnline += apiHelper.OnStreamOnline;
-            Monitor.OnStreamOffline += apiHelper.OnStreamOffline;
+            Monitor.OnStreamOnline += _apiHelper.OnStreamOnline;
+            Monitor.OnStreamOffline += _apiHelper.OnStreamOffline;
 
             FollowMonitor.OnServiceStarted += FollowMonitor_OnServiceStarted;
-            FollowMonitor.OnNewFollowersDetected += apiHelper.OnNewFollow;
+            FollowMonitor.OnNewFollowersDetected += _apiHelper.OnNewFollow;
 
             FollowMonitor.Start();
+            // This fixes follow chat spam on startup
+            FollowMonitor.UpdateLatestFollowersAsync(false);
             Monitor.Start();
 
             Console.WriteLine("Services are started.");

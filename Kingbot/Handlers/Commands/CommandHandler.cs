@@ -102,7 +102,7 @@ namespace Kingbot.Commands
                     break;
 
                 case "lurk":
-                    _lurk.Handle(words, displayName);
+                    _lurk.Handle(words, displayName, IsMod, Id);
                     break;
             }
 

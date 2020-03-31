@@ -56,6 +56,9 @@ namespace Kingbot.Modules
                 case "list":
                     await _data.GetList("Intervals", username);
                     break;
+                case "clear":
+                    ClearIntervalDict();
+                    break;
             }
         }
 
@@ -107,6 +110,11 @@ namespace Kingbot.Modules
             }
             else
                 TwitchBot.client.SendMessage(TwitchBot.channel, $"Interval {name} doesn't exist! Perhaps you never started it?");
+        }
+
+        public void ClearIntervalDict()
+        {
+            intervals.Clear();
         }
     }
 }

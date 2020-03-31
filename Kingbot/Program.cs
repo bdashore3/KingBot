@@ -4,6 +4,8 @@ using Kingbot.Commands;
 using Kingbot.Helpers.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
+using Kingbot.Helpers.API;
 
 namespace Kingbot
 {
@@ -20,6 +22,7 @@ namespace Kingbot
             IServiceCollection services = new ServiceCollection();
             services.AddScoped<CommandHandler>();
             services.AddScoped<TwitchBot>();
+            services.AddScoped<ApiHelper>();
             services.AddTransient<Quotes>();
             services.AddTransient<Intervals>();
             services.AddTransient<Custom>();
@@ -31,7 +34,7 @@ namespace Kingbot
             return services;
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // Read all credentials first
             CredentialsHelper.ReadCreds(args[0]);
@@ -43,7 +46,7 @@ namespace Kingbot
             var serviceProvider = services.BuildServiceProvider();
 
             // Start up the bot as a service!
-            serviceProvider.GetService<TwitchBot>().Start(args[0]).ConfigureAwait(false).GetAwaiter().GetResult();
+            await serviceProvider.GetService<TwitchBot>().Start();
         }
     }
 }
