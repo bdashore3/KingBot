@@ -98,7 +98,7 @@ namespace Kingbot.Commands
                 case "shoutout":
                     if (!CredentialsHelper.CheckAdmin(IsMod, Id))
                         break;
-                    Other.Shoutout(displayName);
+                    Other.Shoutout(words[1]);
                     break;
 
                 case "lurk":

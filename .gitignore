@@ -1,7 +1,9 @@
-Kingbot/bin/
-Kingbot/obj/
-Kingbot/Properties/
-Kingbot/Migrations/
+*/bin/
+*/obj/
+*/Properties/
+*/Migrations/
 .vs/
 packages/
-info.json
+.vscode/
+
+*/info.json
