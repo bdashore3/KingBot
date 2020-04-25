@@ -19,6 +19,7 @@ namespace Kingbot.Helpers.API
         // When the stream is online, do this
         public void OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
+            _lurk.ClearLurkDict();
             TwitchBot.client.SendMessage(TwitchBot.channel, "The stream is LIVE! Get turnt!");
             // Add function calls here. Make sure to make them public!
         }

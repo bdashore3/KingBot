@@ -32,7 +32,7 @@ namespace Kingbot.Modules
                     await AddCommand(addIndex, message);
                     break;
                 case "remove":
-                    await _data.Ensure(words[2]);
+                    await _data.Delete(words[2]);
                     TwitchBot.client.SendMessage(TwitchBot.channel, $"Command {words[2]} successfully deleted!");
                     break;
                 case "list":
