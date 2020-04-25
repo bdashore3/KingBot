@@ -13,7 +13,7 @@ User=twitch
 Group=twitch
 WorkingDirectory=/home/twitch/KingBot/Kingbot
 Environment = "SCRIPT_ARGS=info.json"
-ExecStart=/usr/bin/dotnet /home/twitch/KingBot/Kingbot/bin/Debug/netcoreapp3.1/Kingbot.dll $SCRIPT_ARGS
+ExecStart=/usr/bin/dotnet /home/twitch/KingBot/Kingbot/bin/Release/netcoreapp3.1/linux-x64/Kingbot.dll $SCRIPT_ARGS
 
 # Limit damage in case something goes awry
 MemoryLimit=256M
