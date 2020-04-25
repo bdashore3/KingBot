@@ -12,7 +12,7 @@ All commands are within `Modules`, but here is a list of the features if you're 
 - Shoutouts: Typing `!so` or `!shoutout` will allow you to shout out a streamer. This is only executable by admins.
 - Stream Events: Has events for: new follows, first time subscribers, recurring subscribers, gifted subs. Hosting is not supported yet and Raids may be supported.
 - Automatically execute functions when the stream goes online/offline. Editable via the API helper file.
-- Lurking: Allow lurkers to have some fun! Type `!lurk` and the bot will know that the user is lurking. When the user types `!lurk` again, he/she will see how much time he/she has lurked for. The user can cancel the lurk state by typing `!lurk cancel`. All lurks are automatically cleared when the stream ends.
+- Lurking: Allow lurkers to have some fun! Type `!lurk` and the bot will know that the user is lurking. When the user types `!lurk` again, he/she will see how much time he/she has lurked for. The user can cancel the lurk state by typing `!lurk cancel`. All lurks are automatically cleared when the stream starts/ends.
 - A universal CRUD interface which allows users to easily program commands that store 2 values in the database.
 
 ## Preparation
@@ -56,9 +56,8 @@ Then, copy **info.sample.json** to **info.json** in the project directory. From 
 Once you clone the repository, change into the project directory (KingBot/Kingbot), install the EF Core tools by:
 `dotnet tool install --global dotnet-ef`
 
-Then run the following commands:
+Then run the following command:
 ```
-dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
 If you have errors, run `dotnet build` and show them to me in the [discord server](https://discord.gg/pswt7by) if you can't figure out the reason.
@@ -66,8 +65,12 @@ If you have errors, run `dotnet build` and show them to me in the [discord serve
 This initializes the database for the first time with all the required tables, rows, and columns. If you plan on updating the model, please read the [Entity Framework Core docs](https://docs.microsoft.com/en-us/ef/core/).
 
 ### Finally:
-Once you're done, type the following command in the terminal inside the project directory (KingBot/Kingbot):
-`dotnet build && dotnet run info.json`
+Once you're done, type the following commands in the terminal inside the project directory (KingBot/Kingbot):
+```
+dotnet build -c Release
+dotnet publish -c Release -f netcoreapp3.1 -r linux-x64
+dotnet run info.json
+```
 
 ## Running in a server
 
@@ -86,7 +89,7 @@ sudo journalctl -u twitch -f
 
 ## Removing the bot
 
-It's easy! All you have to do is delete the bot directory and the systemd file from `/etc/systemd/twitch.service`
+It's easy! All you have to do is delete the bot directory and the systemd file from `/etc/systemd/system/twitch.service`
 
 # Contributing Modules
 The C# version of this bot features modular commands that can be swapped out as needed. To successfully have your module added, you need to follow the guidelines:
