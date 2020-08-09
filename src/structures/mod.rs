@@ -1,20 +1,25 @@
+pub mod cmd_data;
+
 use twitchchat::{Control, Writer, Dispatcher, IntoChannel, events, messages};
-use tokio::stream::StreamExt as _;
-use std::collections::HashMap;
+use tokio::{sync::{Mutex, RwLock}, stream::StreamExt as _};
+use std::{sync::Arc, collections::HashMap};
 use futures::future::BoxFuture;
+use typemap_rev::TypeMap;
+use cmd_data::PubCreds;
 use crate::handlers::command_handler::*;
 
 pub type BotResult<T> = Result<T, Box<dyn std::error::Error>>;
-pub type CommandMap<'a> = HashMap<&'a str, Box<dyn for<'fut> Fn(&'fut mut Bot, &'fut messages::Privmsg<'_>) -> BoxFuture<'fut, BotResult<()>> + Send + Sync>>;
+pub type CommandMap = HashMap<&'static str, Box<dyn for<'fut> Fn(&'fut Bot, &'fut messages::Privmsg<'_>) -> BoxFuture<'fut, BotResult<()>> + Send + Sync>>;
 pub struct Bot {
-    pub writer: Writer,
+    pub writer: Mutex<Writer>,
     pub control: Control,
-    pub default_prefix: String,
+    pub command_map: CommandMap,
+    pub data: Arc<RwLock<TypeMap>>,
     pub start: std::time::Instant,
 }
 
 impl Bot {
-    pub async fn run(mut self, dispatcher: Dispatcher, channel: impl IntoChannel, command_map: CommandMap<'_>) -> BotResult<()> {
+    pub async fn run(mut self, dispatcher: Dispatcher, channel: impl IntoChannel) {
         let mut privmsg = dispatcher.subscribe::<events::Privmsg>();
 
         let mut join = dispatcher.subscribe::<events::Join>();
@@ -23,7 +28,7 @@ impl Bot {
             Ok(ready) => println!("Connected! our name is: {}", ready.nickname),
             Err(e) => {
                 eprintln!("There was an error when connecting to twitch!: {}", e);
-                return Err("Error when connecting to Twitch".into());
+                return;
             }
         }
 
@@ -31,10 +36,9 @@ impl Bot {
             Ok(_) => println!("Sucessfully joined the channel"),
             Err(e) => {
                 eprintln!("There was an error when joining the channel!: {}", e);
-                return Err("Error when joining the channel".into());
+                return;
             }
         }
-
 
         loop {
             tokio::select! {
@@ -43,8 +47,13 @@ impl Bot {
                 }
 
                 Some(msg) = privmsg.next() => {
-                    if &msg.data[..1] == &self.default_prefix {
-                        handle_command(&mut self, &msg, &command_map).await?;
+                    let data = self.data.read().await;
+                    let default_prefix = data.get::<PubCreds>().unwrap().get("default prefix").unwrap();
+                    if &msg.data[..1] == default_prefix {
+                        if let Err(e) = handle_command(&self, &msg, &self.command_map).await {
+                            eprintln!("Error in command!: {}", e);
+                            return
+                        };
                     }
                 }
             }

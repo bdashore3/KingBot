@@ -4,14 +4,20 @@ mod commands;
 mod helpers;
 
 use twitchchat::*;
-use crate::structures::*;
 use std::{
     env,
-    collections::HashMap
+    collections::HashMap, sync::Arc
 };
+use typemap_rev::TypeMap;
+use tokio::sync::{Mutex, RwLock};
 use crate::{
     handlers::command_handler,
-    helpers::credentials_helper
+    helpers::{
+        credentials_helper,
+        database_helper
+    },
+    structures::*,
+    cmd_data::*
 };
 
 fn fetch_info(path: &str) -> (String, String) {
@@ -28,18 +34,31 @@ async fn main() -> BotResult<()> {
     let (mut runner, mut control) = Runner::new(dispatcher.clone());
 
     let mut command_map = HashMap::new();
+    let data = Arc::new(RwLock::new(TypeMap::new()));
+
+    let pool = database_helper::obtain_db_pool(creds.db_connection).await?;
+
+    let mut pub_creds = HashMap::new();
+    pub_creds.insert("default prefix".to_string(), creds.default_prefix);
 
     let channel = creds.channel;
+
+    {
+        let mut data = data.write().await;
+        data.insert::<PubCreds>(Arc::new(pub_creds));
+        data.insert::<ConnectionPool>(Arc::new(pool));
+    }
 
     command_handler::insert_commands(&mut command_map);
 
     let bot = Bot {
-        writer: control.writer().clone(),
+        writer: Mutex::new(control.writer().clone()),
         control,
-        default_prefix: creds.default_prefix.to_string(),
-        start: std::time::Instant::now()
+        command_map,
+        start: std::time::Instant::now(),
+        data
     }
-    .run(dispatcher, channel, command_map);
+    .run(dispatcher, channel);
 
     let connector = twitchchat::Connector::new(|| async move {
         let args: Vec<String> = env::args().collect();

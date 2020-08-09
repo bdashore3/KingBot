@@ -8,7 +8,8 @@ pub struct Credentials {
     pub bot_username: String,
     pub bot_token: String,
     pub default_prefix: String,
-    pub channel: String
+    pub channel: String,
+    pub db_connection: String
 }
 
 pub fn read_creds(path: &str) -> BotResult<Credentials> {
