@@ -1,0 +1,96 @@
+{
+  "db": "PostgreSQL",
+  "1ff28225cf71331fbf8fce2ea0ae2e06e20068413874bb454de7bf4603fdcbc1": {
+    "query": "INSERT INTO quotes VALUES ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "215b10bc8213775ecc8f9a0004bd431a14e1fc98909d87e64c212e90c845a4fb": {
+    "query": "SELECT alias FROM quotes WHERE channel_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "alias",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "3c8a62b51b305a763930f8151620f46a0d0dc74f865e536e103beb81fefb78d0": {
+    "query": "DELETE FROM quotes WHERE channel_name = $1 AND alias = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "834d922dc709b38f9fc49c104f08c0fe93bdda1ed2a2cf6f0481b355f5c138f6": {
+    "query": "SELECT alias, content FROM quotes WHERE channel_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "alias",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "content",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "976e3c585c9435e5846708abb0cdf6cb9cb4ce733ddfe7924fd29b6e43141ddb": {
+    "query": "SELECT ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
+    }
+  },
+  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
+    "query": "",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
+    }
+  }
+}
