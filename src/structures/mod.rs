@@ -8,21 +8,23 @@ use typemap_rev::TypeMap;
 use cmd_data::PubCreds;
 use crate::handlers::command_handler::*;
 
-pub type BotResult<T> = Result<T, Box<dyn std::error::Error>>;
+pub type BotResult<T> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
 pub type CommandMap = HashMap<&'static str, Box<dyn for<'fut> Fn(&'fut Bot, &'fut messages::Privmsg<'_>) -> BoxFuture<'fut, BotResult<()>> + Send + Sync>>;
 pub struct Bot {
+    pub control: Mutex<Control>,
     pub writer: Mutex<Writer>,
-    pub control: Control,
     pub command_map: CommandMap,
     pub data: Arc<RwLock<TypeMap>>,
     pub start: std::time::Instant,
 }
 
 impl Bot {
-    pub async fn run(mut self, dispatcher: Dispatcher, channel: impl IntoChannel) {
+    pub async fn run(self, dispatcher: Dispatcher, channel: impl IntoChannel) {
         let mut privmsg = dispatcher.subscribe::<events::Privmsg>();
 
         let mut join = dispatcher.subscribe::<events::Join>();
+
+        let mut user_notice = dispatcher.subscribe::<events::UserNotice>();   
 
         match dispatcher.wait_for::<events::IrcReady>().await {
             Ok(ready) => println!("Connected! our name is: {}", ready.nickname),
@@ -32,16 +34,21 @@ impl Bot {
             }
         }
 
-        match self.control.writer().join(channel).await {
-            Ok(_) => println!("Sucessfully joined the channel"),
-            Err(e) => {
-                eprintln!("There was an error when joining the channel!: {}", e);
-                return;
+        {
+            let mut control = self.control.lock().await;
+            match control.writer().join(channel).await {
+                Ok(_) => println!("Sucessfully joined the channel"),
+                Err(e) => {
+                    eprintln!("There was an error when joining the channel!: {}", e);
+                    return;
+                }
             }
         }
 
         loop {
             tokio::select! {
+                Some(notice) = user_notice.next() => {}
+
                 Some(join_msg) = join.next() => {
                     eprintln!("{} joined {}", join_msg.name, join_msg.channel);
                 }

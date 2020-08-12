@@ -3,7 +3,12 @@ mod structures;
 mod commands;
 mod helpers;
 
-use twitchchat::*;
+use twitchchat::{
+    Dispatcher,
+    Runner,
+    Connector,
+    native_tls
+};
 use std::{
     env,
     collections::HashMap, sync::Arc
@@ -27,6 +32,8 @@ fn fetch_info(path: &str) -> (String, String) {
 
 #[tokio::main]
 async fn main() -> BotResult<()> {
+    pretty_env_logger::init();
+
     let args: Vec<String> = env::args().collect();
     let creds = credentials_helper::read_creds(&args[1]).unwrap();
 
@@ -53,18 +60,18 @@ async fn main() -> BotResult<()> {
 
     let bot = Bot {
         writer: Mutex::new(control.writer().clone()),
-        control,
+        control: Mutex::new(control),
         command_map,
         start: std::time::Instant::now(),
         data
     }
     .run(dispatcher, channel);
 
-    let connector = twitchchat::Connector::new(|| async move {
+    let connector = Connector::new(|| async move {
         let args: Vec<String> = env::args().collect();
         let info = fetch_info(&args[1]);
         let (nick, pass) = (info.0, info.1);
-        twitchchat::native_tls::connect_easy(&nick, &pass).await
+        native_tls::connect_easy(&nick, &pass).await
     });
 
     let done = runner.run_with_retry(connector, twitchchat::RetryStrategy::on_timeout);

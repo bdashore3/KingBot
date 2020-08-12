@@ -1,4 +1,4 @@
-use crate::structures::*;
+use crate::structures::{Bot, BotResult};
 use twitchchat::messages;
 use hook::*;
 
@@ -14,6 +14,7 @@ pub async fn ping(bot: &Bot, msg: &messages::Privmsg<'_>) -> BotResult<()> {
 #[hook]
 pub async fn uptime(bot: &Bot, msg: &messages::Privmsg<'_>) -> BotResult<()> {
     let mut writer = bot.writer.lock().await;
+
     let dur = std::time::Instant::now() - bot.start;
     let resp = format!("I've been running for.. {:.2?}.", dur);
     writer.privmsg(&msg.channel, &resp).await?;

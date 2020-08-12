@@ -1,7 +1,8 @@
 use twitchchat::messages;
 use crate::structures::*;
 use crate::commands::{
-    general::*
+    general::*,
+    quotes::*,
 };
 use crate::helpers::string_renderer;
 
@@ -18,4 +19,5 @@ pub async fn handle_command(bot: &Bot, msg: &messages::Privmsg<'_>, command_map:
 pub fn insert_commands(command_map: &mut CommandMap) {
     command_map.insert("ping", Box::new(ping));
     command_map.insert("uptime", Box::new(uptime));
+    command_map.insert("quote", Box::new(dispatch_quote));
 }
