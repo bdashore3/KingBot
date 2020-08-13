@@ -14,18 +14,19 @@
       "nullable": []
     }
   },
-  "215b10bc8213775ecc8f9a0004bd431a14e1fc98909d87e64c212e90c845a4fb": {
-    "query": "SELECT alias FROM quotes WHERE channel_name = $1",
+  "2126bea7aa62238eb94f2f47a5dfcae309550c8484cb80024a4a549976007a9e": {
+    "query": "SELECT content FROM commands WHERE channel_name = $1 AND name = $2",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "alias",
+          "name": "content",
           "type_info": "Text"
         }
       ],
       "parameters": {
         "Left": [
+          "Text",
           "Text"
         ]
       },
@@ -45,6 +46,32 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "436cd35ea7b72fa5989349f25b0215dbf0f874e8c0ff7b6ae27d85ab4c74f313": {
+    "query": "SELECT name, content FROM commands WHERE channel_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "content",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
     }
   },
   "834d922dc709b38f9fc49c104f08c0fe93bdda1ed2a2cf6f0481b355f5c138f6": {
@@ -73,22 +100,43 @@
       ]
     }
   },
-  "976e3c585c9435e5846708abb0cdf6cb9cb4ce733ddfe7924fd29b6e43141ddb": {
-    "query": "SELECT ",
+  "cc68d5db31ea00c5fcef1401a9c4f91b46ae0dc837ad2b04abf6cdbcaf888286": {
+    "query": "INSERT INTO commands(channel_name, name, content)\n            VALUES($1, $2, $3)\n            ON CONFLICT (channel_name, name)\n            DO UPDATE\n            SET content = EXCLUDED.content",
     "describe": {
       "columns": [],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
       },
       "nullable": []
     }
   },
-  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
-    "query": "",
+  "dc6419c0d5b32e22752ccbab9805ad84454b5e48c17237b63c67c232fe0bd770": {
+    "query": "INSERT INTO commands VALUES($1, $2, $3)",
     "describe": {
       "columns": [],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "de13850e2a96ec23a6458da770aac7832b36f32c9b9d90d70c15c7d8511a0f81": {
+    "query": "DELETE FROM commands WHERE channel_name = $1 AND name = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
       },
       "nullable": []
     }

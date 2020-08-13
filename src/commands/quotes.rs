@@ -1,8 +1,11 @@
 use hook::*;
-use crate::{helpers::string_renderer, structures::{Bot, BotResult, cmd_data::ConnectionPool}};
 use twitchchat::{messages, Writer};
 use sqlx::PgPool;
 use rand::{prelude::StdRng, Rng, SeedableRng};
+use crate::{
+    helpers::string_renderer,
+    structures::{Bot, BotResult, cmd_data::ConnectionPool}
+};
 
 #[hook]
 pub async fn dispatch_quote(bot: &Bot, msg: &messages::Privmsg<'_>) -> BotResult<()> {
@@ -20,9 +23,9 @@ pub async fn dispatch_quote(bot: &Bot, msg: &messages::Privmsg<'_>) -> BotResult
     let subcommand = string_renderer::get_message_word(&*msg.data, 1).unwrap();
 
     match subcommand {
-        "add" => add(pool.as_ref(), msg, &mut writer).await?,
-        "remove" => remove(pool.as_ref(), msg, &mut writer).await?,
-        "list" => list(pool.as_ref(), msg, &mut writer).await?,
+        "add" => add(pool, msg, &mut writer).await?,
+        "remove" => remove(pool, msg, &mut writer).await?,
+        "list" => list(pool, msg, &mut writer).await?,
         _ => retrieve(pool, msg, &mut writer, false).await?
     }
 
@@ -30,11 +33,6 @@ pub async fn dispatch_quote(bot: &Bot, msg: &messages::Privmsg<'_>) -> BotResult
 }
 
 pub async fn add(pool: &PgPool, msg: &messages::Privmsg<'_>, writer: &mut Writer) -> BotResult<()> {
-    if string_renderer::get_command_length(&*msg.data) < 4 {
-        writer.privmsg(&msg.channel, "Please provide an alias AND content for the quote!").await?;
-        return Ok(())
-    }
-
     let quote_phrase = match string_renderer::get_message_word(&*msg.data, 2) {
         Ok(phrase) => phrase,
         Err(_e) => {
@@ -90,7 +88,7 @@ pub async fn remove(pool: &PgPool, msg: &messages::Privmsg<'_>, writer: &mut Wri
 
 pub async fn list(pool: &PgPool, msg: &messages::Privmsg<'_>, writer: &mut Writer) -> BotResult<()> {
     let quote_data = sqlx::query!("SELECT alias, content FROM quotes WHERE channel_name = $1", &*msg.channel)
-    .fetch_all(pool).await?;
+        .fetch_all(pool).await?;
 
     if quote_data.len() <= 0 {
         writer.privmsg(&msg.channel, "There are no quotes in this channel! Maybe add some?").await?;

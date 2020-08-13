@@ -5,7 +5,10 @@ fn get_split_string(message_string: &str) -> Vec<&str> {
 }
 
 pub fn get_message_word(message_string: &str, index: usize) -> BotResult<&str> {
-    Ok(get_split_string(message_string)[index])
+    match get_split_string(message_string).get(index) {
+        Some(word) => return Ok(word),
+        None => return Err("Couldn't find the string!".into())
+    }
 }
 
 pub fn get_command(message_string: &str) -> &str {
@@ -16,6 +19,11 @@ pub fn get_command(message_string: &str) -> &str {
 
 pub fn join_string(message_string: &str, end_index: usize) -> BotResult<String> {
     let mut words = get_split_string(message_string);
+    
+    if words.get(end_index + 1).is_none() {
+        return Err("No words provided!".into())
+    }
+
     words.remove(0);
     words.drain(0.. end_index);
     Ok(words.join(" "))

@@ -4,7 +4,6 @@ use hook::*;
 
 #[hook]
 pub async fn ping(bot: &Bot, msg: &messages::Privmsg<'_>) -> BotResult<()> {
-    println!("Command called");
     let mut writer = bot.writer.lock().await;
     writer.privmsg(&msg.channel, "Pong!").await?;
 
