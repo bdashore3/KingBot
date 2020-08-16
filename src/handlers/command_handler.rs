@@ -4,6 +4,7 @@ use crate::commands::{
     general::*,
     quotes::*,
     custom::*,
+    lurk::*
 };
 use crate::helpers::string_renderer;
 use cmd_data::ConnectionPool;
@@ -37,4 +38,5 @@ pub fn insert_commands(command_map: &mut CommandMap) {
     command_map.insert("uptime", Box::new(uptime));
     command_map.insert("quote", Box::new(dispatch_quote));
     command_map.insert("command", Box::new(dispatch_custom));
+    command_map.insert("lurk", Box::new(dispatch_lurk));
 }

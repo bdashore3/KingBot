@@ -114,20 +114,6 @@
       "nullable": []
     }
   },
-  "dc6419c0d5b32e22752ccbab9805ad84454b5e48c17237b63c67c232fe0bd770": {
-    "query": "INSERT INTO commands VALUES($1, $2, $3)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "de13850e2a96ec23a6458da770aac7832b36f32c9b9d90d70c15c7d8511a0f81": {
     "query": "DELETE FROM commands WHERE channel_name = $1 AND name = $2",
     "describe": {

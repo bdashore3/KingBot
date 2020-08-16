@@ -24,6 +24,7 @@ use crate::{
     structures::*,
     cmd_data::*
 };
+use dashmap::DashMap;
 
 fn fetch_info(path: &str) -> (String, String) {
     let creds = credentials_helper::read_creds(path).unwrap();
@@ -54,6 +55,7 @@ async fn main() -> BotResult<()> {
         let mut data = data.write().await;
         data.insert::<PubCreds>(Arc::new(pub_creds));
         data.insert::<ConnectionPool>(Arc::new(pool));
+        data.insert::<LurkTimes>(Arc::new(DashMap::new()))
     }
 
     command_handler::insert_commands(&mut command_map);
