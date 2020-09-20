@@ -1,0 +1,4 @@
+/.vscode
+/target
+/src/info.json
+.env
