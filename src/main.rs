@@ -19,7 +19,9 @@ async fn event_handler(bot: &Bot, event: messages::Commands<'_>) -> KingResult {
         // This is the one users send to channels
         Privmsg(msg) => {
             if let Some(command) = bot.commands.get(msg.data()) {
-                command(&bot, &msg).await?;
+                let info = command_utils::generate_info(&msg);
+
+                command(&bot, &msg, info).await?;
             }
         },
         Ready(_) => {
