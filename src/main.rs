@@ -2,26 +2,32 @@ mod structures;
 mod modules;
 mod helpers;
 
-use std::env;
-use helpers::credentials_helper;
-use structures::{KingResult, Bot};
-use tokio::sync::Mutex;
+use std::{collections::HashMap, env, sync::Arc};
+use credentials_helper::Credentials;
+use helpers::{credentials_helper, database_helper};
+use structures::{cmd_data::*, KingResult, Bot};
+use tokio::sync::{Mutex, RwLock};
 use twitchchat::{
     connector::TokioConnector as Connector, messages::{self, Commands::*},
     runner::{AsyncRunner, Status},
     UserConfig,
 };
 use helpers::command_utils;
+use typemap_rev::TypeMap;
 
 async fn event_handler(bot: &Bot, event: messages::Commands<'_>) -> KingResult {
-    // All sorts of messages
     match event {
-        // This is the one users send to channels
         Privmsg(msg) => {
-            if let Some(command) = bot.commands.get(msg.data()) {
-                let info = command_utils::generate_info(&msg);
+            let prefix = command_utils::fetch_prefix(bot, &msg).await;
 
-                command(&bot, &msg, info).await?;
+            if msg.data()[..prefix.len()] == prefix {
+                let word = command_utils::fetch_command(&msg, &prefix);
+
+                if let Some(command) = bot.commands.get(word) {
+                    let info = command_utils::generate_info(&msg, word);
+    
+                    command(&bot, &msg, info).await?;
+                }
             }
         },
         Ready(_) => {
@@ -54,27 +60,42 @@ async fn main_loop(bot: Bot, mut runner: AsyncRunner) -> KingResult {
 
 #[tokio::main]
 async fn main() -> KingResult {
-    let (user_config, channels) = get_info()?;
+    let args: Vec<String> = env::args().collect();
+    let creds = credentials_helper::read_creds(&args[1]).unwrap();
+
+    let (user_config, channels) = get_info(&creds)?;
+
+    let mut pub_creds = HashMap::new();
+    pub_creds.insert("default prefix".to_owned(), creds.default_prefix);
 
     let runner = connect(&user_config, &channels).await?;
 
     let command_map = command_utils::register_commands();
 
+    let pool = database_helper::obtain_db_pool(&creds.db_connection).await?;
+    let prefixes = database_helper::fetch_prefixes(&pool).await?;
+
     let bot = Bot {
         commands: command_map,
-        writer: Mutex::new(runner.writer())
+        writer: Mutex::new(runner.writer()),
+        data: Arc::new(RwLock::new(TypeMap::new()))
     };
+
+    {
+        let mut data = bot.data.write().await;
+
+        data.insert::<ConnectionPool>(pool);
+        data.insert::<PrefixMap>(Arc::new(prefixes));
+        data.insert::<PubCreds>(Arc::new(pub_creds));
+    }
 
     main_loop(bot, runner).await
 }
 
-fn get_info() -> KingResult<(twitchchat::UserConfig, Vec<String>)> {
-    let args: Vec<String> = env::args().collect();
-    let creds = credentials_helper::read_creds(&args[1]).unwrap();
-
+fn get_info(creds: &Credentials) -> KingResult<(twitchchat::UserConfig, Vec<String>)> {
     let config = UserConfig::builder()
-        .name(creds.bot_username)
-        .token(creds.bot_token)
+        .name(&creds.bot_username)
+        .token(&creds.bot_token)
         .enable_all_capabilities()
         .build()?;
 

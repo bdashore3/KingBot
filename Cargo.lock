@@ -219,9 +219,9 @@ dependencies = [
 
 [[package]]
 name = "event-listener"
-version = "2.4.0"
+version = "2.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1cd41440ae7e4734bbd42302f63eaba892afc93a3912dad84006247f0dedb0e"
+checksum = "f7531096570974c3a9dcf9e4b8e1cede1ec26cf5046219fb3b9d897503b9be59"
 
 [[package]]
 name = "fastrand"
@@ -316,9 +316,9 @@ checksum = "de27142b013a8e869c14957e6d2edeef89e97c289e69d042ee3a49acd8b51789"
 
 [[package]]
 name = "futures-lite"
-version = "1.7.0"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b77e08e656f472d8ea84c472fa8b0a7a917883048e1cf2d4e34a323cd0aaf63"
+checksum = "0db18c5f58083b54b0c416638ea73066722c2815c1e54dd8ba85ee3def593c3a"
 dependencies = [
  "fastrand",
  "futures-core",
@@ -430,9 +430,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.15"
+version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3deed196b6e7f9e44a2ae8d94225d80302d81208b1bb673fd21fe634645c85a9"
+checksum = "4c30f6d0bc6b00693347368a67d41b58f2fb851215ff1da49e90fe2c5c667151"
 dependencies = [
  "libc",
 ]
@@ -525,6 +525,7 @@ dependencies = [
  "dashmap",
  "futures",
  "hook",
+ "rand",
  "serde",
  "serde_json",
  "sqlx",
@@ -1292,9 +1293,9 @@ dependencies = [
 
 [[package]]
 name = "twitchchat"
-version = "0.13.1"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cbfa520749ab812320fbdead44763ffa83795622c7c50bf397bc5fbefada619"
+checksum = "81fca5949ec582f9d7dae1d56a134112d6f5ba0fc9272145b8bfb8056555cf42"
 dependencies = [
  "async-channel",
  "async-dup",
