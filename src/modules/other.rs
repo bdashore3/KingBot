@@ -5,8 +5,6 @@ use crate::structures::{Bot, KingResult, CommandInfo};
 
 #[hook]
 pub async fn ping(bot: &Bot, msg: &Privmsg<'_>, _: CommandInfo) -> KingResult {
-    println!("Ping called");
-
     let mut writer = bot.writer.lock().await;
 
     writer.say(msg, "Pong!")?;

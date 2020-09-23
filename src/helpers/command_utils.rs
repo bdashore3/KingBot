@@ -1,17 +1,19 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use twitchchat::messages::Privmsg;
 
 use crate::structures::{Bot, Command, CommandInfo, CommandMap, cmd_data::PrefixMap, cmd_data::PubCreds};
 use crate::modules::{
     other::*,
-    quotes::*
+    quotes::*,
+    intervals::*
 };
 
 pub fn register_commands() -> CommandMap {
     let mut command_map: HashMap<String, Command> = HashMap::new();
-    command_map.insert("ping".to_owned(), Box::new(ping));
-    command_map.insert("quote".to_owned(), Box::new(dispatch_quote));
+    command_map.insert("ping".to_owned(), Arc::new(ping));
+    command_map.insert("quote".to_owned(), Arc::new(dispatch_quote));
+    command_map.insert("interval".to_owned(), Arc::new(dispatch_interval));
 
     command_map
 }

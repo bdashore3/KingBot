@@ -83,6 +83,7 @@ pub async fn remove(bot: &Bot, msg: &messages::Privmsg<'_>, info: CommandInfo) -
         Some(phrase) => phrase,
         None => {
             writer.say(msg, "Please provide an alias to remove the quote (not a number)! Check the list?")?;
+
             return Ok(())
         }
     };
@@ -154,6 +155,7 @@ pub async fn retrieve(bot: &Bot, msg: &messages::Privmsg<'_>, info: CommandInfo)
         Ok(quote_num) => {
             if quote_num <= 0 {
                 writer.say(msg, "Please enter a number greater than 0!")?;
+
                 return Ok(())
             }
 

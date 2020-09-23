@@ -7,13 +7,20 @@ use twitchchat::{messages::Privmsg, Writer};
 use typemap_rev::TypeMap;
 
 pub type KingResult<T = ()> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
-pub type Command = Box<dyn for<'fut> Fn(&'fut Bot, &'fut Privmsg<'_>, CommandInfo) -> BoxFuture<'fut, KingResult> + Send + Sync>;
+pub type Command = Arc<dyn for<'fut> Fn(&'fut Bot, &'fut Privmsg<'_>, CommandInfo) -> BoxFuture<'fut, KingResult> + Send + Sync>;
 pub type CommandMap = HashMap<String, Command>;
 
+#[derive(Clone)]
 pub struct Bot {
-    pub writer: Mutex<Writer>,
+    pub writer: Arc<Mutex<Writer>>,
     pub commands: CommandMap,
     pub data: Arc<RwLock<TypeMap>>
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct IntervalInfo {
+    pub channel: String,
+    pub alias: String
 }
 
 #[derive(Clone, Debug)]

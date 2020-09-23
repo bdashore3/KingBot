@@ -4,6 +4,7 @@ mod helpers;
 
 use std::{collections::HashMap, env, sync::Arc};
 use credentials_helper::Credentials;
+use dashmap::DashMap;
 use helpers::{credentials_helper, database_helper};
 use structures::{cmd_data::*, KingResult, Bot};
 use tokio::sync::{Mutex, RwLock};
@@ -77,7 +78,7 @@ async fn main() -> KingResult {
 
     let bot = Bot {
         commands: command_map,
-        writer: Mutex::new(runner.writer()),
+        writer: Arc::new(Mutex::new(runner.writer())),
         data: Arc::new(RwLock::new(TypeMap::new()))
     };
 
@@ -87,6 +88,7 @@ async fn main() -> KingResult {
         data.insert::<ConnectionPool>(pool);
         data.insert::<PrefixMap>(Arc::new(prefixes));
         data.insert::<PubCreds>(Arc::new(pub_creds));
+        data.insert::<IntervalMap>(Arc::new(RwLock::new(Vec::new())));
     }
 
     main_loop(bot, runner).await
