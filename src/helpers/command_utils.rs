@@ -2,11 +2,13 @@ use std::{collections::HashMap, sync::Arc};
 
 use twitchchat::messages::Privmsg;
 
-use crate::structures::{Bot, Command, CommandInfo, CommandMap, cmd_data::PrefixMap, cmd_data::PubCreds};
+use crate::structures::{Bot, Command, CommandInfo, CommandMap, KingResult, cmd_data::PrefixMap, cmd_data::PubCreds};
 use crate::modules::{
     other::*,
     quotes::*,
-    intervals::*
+    intervals::*,
+    custom::*,
+    lurks::*
 };
 
 pub fn register_commands() -> CommandMap {
@@ -14,6 +16,8 @@ pub fn register_commands() -> CommandMap {
     command_map.insert("ping".to_owned(), Arc::new(ping));
     command_map.insert("quote".to_owned(), Arc::new(dispatch_quote));
     command_map.insert("interval".to_owned(), Arc::new(dispatch_interval));
+    command_map.insert("command".to_owned(), Arc::new(dispatch_custom));
+    command_map.insert("lurk".to_owned(), Arc::new(dispatch_lurk));
 
     command_map
 }
@@ -53,4 +57,17 @@ pub fn generate_info(msg: &Privmsg, command: &str) -> CommandInfo {
         command: command.to_owned(),
         words
     }
+}
+
+pub fn get_time(initial_time: &u64, parameter: &str) -> KingResult<u64> {
+    let value = match parameter {
+        "seconds" => initial_time % 60,
+        "minutes" => (initial_time / 60) % 60,
+        "hours" => (initial_time / 3600) % 24,
+        _ => {
+            return Err("Invalid parameter input".into())
+        }
+    };
+
+    Ok(value)
 }

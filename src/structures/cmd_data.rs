@@ -28,3 +28,9 @@ pub struct IntervalMap;
 impl TypeMapKey for IntervalMap {
     type Value = Arc<RwLock<Vec<IntervalInfo>>>;
 }
+
+pub struct LurkTimes;
+
+impl TypeMapKey for LurkTimes {
+    type Value = Arc<DashMap<String, u64>>;
+}

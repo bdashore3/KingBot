@@ -22,9 +22,7 @@ pub async fn dispatch_quote(bot: &Bot, msg: &Privmsg<'_>, info: CommandInfo) -> 
         return Ok(())
     }
 
-    let subcommand = &info.get(0).unwrap();
-
-    match subcommand.as_str() {
+    match info.get(0).unwrap().as_str() {
         "add" => add(bot, msg, info).await?,
         "remove" => remove(bot, msg, info).await?,
         "list" => list(bot, msg).await?,
@@ -52,7 +50,7 @@ pub async fn add(bot: &Bot, msg: &messages::Privmsg<'_>, mut info: CommandInfo) 
         return Ok(());
     }
 
-    let joined_string = match info.join(1) {
+    let joined_string = match info.join(2) {
         Ok(joined) => joined,
         Err(_e) => {
             writer.say(msg, "Please provide some content for the quote's alias!")?;

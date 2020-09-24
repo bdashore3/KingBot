@@ -8,11 +8,7 @@ use dashmap::DashMap;
 use helpers::{credentials_helper, database_helper};
 use structures::{cmd_data::*, KingResult, Bot};
 use tokio::sync::{Mutex, RwLock};
-use twitchchat::{
-    connector::TokioConnector as Connector, messages::{self, Commands::*},
-    runner::{AsyncRunner, Status},
-    UserConfig,
-};
+use twitchchat::{PrivmsgExt, UserConfig, connector::TokioConnector as Connector, messages::{self, Commands::*}, runner::{AsyncRunner, Status}};
 use helpers::command_utils;
 use typemap_rev::TypeMap;
 
@@ -28,6 +24,8 @@ async fn event_handler(bot: &Bot, event: messages::Commands<'_>) -> KingResult {
                     let info = command_utils::generate_info(&msg, word);
     
                     command(&bot, &msg, info).await?;
+                } else {
+                    unrecognized_command(bot, &msg, word).await?
                 }
             }
         },
@@ -35,6 +33,24 @@ async fn event_handler(bot: &Bot, event: messages::Commands<'_>) -> KingResult {
             println!("Bot is now ready to work!");
         }
         _ => {}
+    }
+
+    Ok(())
+}
+
+async fn unrecognized_command(bot: &Bot, msg: &messages::Privmsg<'_>, command: &str) -> KingResult {
+    let pool = bot.data.read().await
+        .get::<ConnectionPool>().cloned().unwrap();
+    let command_data = sqlx::query!("SELECT content FROM commands WHERE channel_name = $1 AND name = $2",
+            msg.channel(), command)
+        .fetch_optional(&pool).await?;
+
+    if let Some(command_data) = command_data {
+        let mut writer = bot.writer.lock().await;
+        let content = command_data.content
+            .replace("{user}", msg.name())
+            .replace("{channel}", &msg.channel()[1..]);
+        writer.say(&msg, &content)?;
     }
 
     Ok(())
@@ -88,6 +104,7 @@ async fn main() -> KingResult {
         data.insert::<ConnectionPool>(pool);
         data.insert::<PrefixMap>(Arc::new(prefixes));
         data.insert::<PubCreds>(Arc::new(pub_creds));
+        data.insert::<LurkTimes>(Arc::new(DashMap::new()));
         data.insert::<IntervalMap>(Arc::new(RwLock::new(Vec::new())));
     }
 
