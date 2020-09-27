@@ -1,0 +1,286 @@
+{
+  "db": "PostgreSQL",
+  "03f8534ccbd9a10eacda3082e75e51185de9a3c78753c6c5d58491f81034eba4": {
+    "query": "SELECT FROM messages WHERE channel_name = $1",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1ff28225cf71331fbf8fce2ea0ae2e06e20068413874bb454de7bf4603fdcbc1": {
+    "query": "INSERT INTO quotes VALUES ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "2126bea7aa62238eb94f2f47a5dfcae309550c8484cb80024a4a549976007a9e": {
+    "query": "SELECT content FROM commands WHERE channel_name = $1 AND name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "content",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "3c8a62b51b305a763930f8151620f46a0d0dc74f865e536e103beb81fefb78d0": {
+    "query": "DELETE FROM quotes WHERE channel_name = $1 AND alias = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "436cd35ea7b72fa5989349f25b0215dbf0f874e8c0ff7b6ae27d85ab4c74f313": {
+    "query": "SELECT name, content FROM commands WHERE channel_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "content",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "55c89d0784980ef02e0318d391250795c91845ba74d4c1101587ec98c4393cab": {
+    "query": "SELECT alias, message FROM intervals WHERE channel_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "alias",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "message",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "5be0cd743fce4512323e982c4b16eb443103b97d3f7384ae8ab463b701ebd8de": {
+    "query": "SELECT shoutout FROM messages WHERE channel_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "shoutout",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        true
+      ]
+    }
+  },
+  "7e4d03a314c9b079c9dd36f2dd71c9b5a540ce21c7196161b1738e55f315a02d": {
+    "query": "INSERT INTO intervals VALUES ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "80d7295e46f932f6f38aeac3817d1d3573c11e142c56fed00e8b261106ca6f6e": {
+    "query": "DELETE FROM intervals WHERE channel_name = $1 AND alias = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "834d922dc709b38f9fc49c104f08c0fe93bdda1ed2a2cf6f0481b355f5c138f6": {
+    "query": "SELECT alias, content FROM quotes WHERE channel_name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "alias",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "content",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "8609e731bc54412211e63d5e7495b710f66ba412887e0b810f85c3af237331bb": {
+    "query": "INSERT INTO messages VALUES($1, $2)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "97533973ea1dc6d60fd3b9226c6f025748da24a4666f5b9ff494919f4fee1977": {
+    "query": "SELECT name, prefix FROM channel_info",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "prefix",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
+  "9e7d98bf9e2cee9fda517d098b53e6c1a8fca7b887efcd0080fba3842bb6d435": {
+    "query": "SELECT message FROM intervals WHERE channel_name = $1 AND alias = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "message",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "cc68d5db31ea00c5fcef1401a9c4f91b46ae0dc837ad2b04abf6cdbcaf888286": {
+    "query": "INSERT INTO commands(channel_name, name, content)\n            VALUES($1, $2, $3)\n            ON CONFLICT (channel_name, name)\n            DO UPDATE\n            SET content = EXCLUDED.content",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "de13850e2a96ec23a6458da770aac7832b36f32c9b9d90d70c15c7d8511a0f81": {
+    "query": "DELETE FROM commands WHERE channel_name = $1 AND name = $2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "e29708c77f2ca6b196bf2f678eaeeaf2ab627a3202e12ba28eb96083de09b399": {
+    "query": "INSERT INTO messages VALUES($1, $2)\n                    ON CONFLICT (channel_name)\n                    DO UPDATE\n                    SET shoutout = EXCLUDED.shoutout",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  }
+}
