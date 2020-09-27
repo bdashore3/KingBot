@@ -18,6 +18,8 @@ pub fn register_commands() -> CommandMap {
     command_map.insert("interval".to_owned(), Arc::new(dispatch_interval));
     command_map.insert("command".to_owned(), Arc::new(dispatch_custom));
     command_map.insert("lurk".to_owned(), Arc::new(dispatch_lurk));
+    command_map.insert("shoutout".to_owned(), Arc::new(shoutout));
+    command_map.insert("so".to_owned(), Arc::new(shoutout));
 
     command_map
 }

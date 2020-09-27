@@ -3,10 +3,12 @@ use std::fs;
 use std::io::BufReader;
 use crate::structures::KingResult;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Credentials {
     pub bot_username: String,
     pub bot_token: String,
+    pub api_id: String,
+    pub api_token: String,
     pub default_prefix: String,
     pub channel: String,
     pub db_connection: String

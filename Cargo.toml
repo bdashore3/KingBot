@@ -13,6 +13,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 hook = { git = "https://github.com/acdenisSK/hook" }
 rand = "0.7.3"
+reqwest = { version = "0.10.8", features = ["json"] }
+
 
 [dependencies.twitchchat]
 version = "0.13.3"
@@ -22,3 +24,11 @@ features = ["async", "tokio", "tokio-util"]
 version = "0.4.0-beta.1"
 default-features = false
 features = ["runtime-tokio", "macros", "postgres", "uuid", "offline"]
+
+[dependencies.rocket]
+git = "https://github.com/SergioBenitez/Rocket/"
+
+[dependencies.rocket_contrib]
+git = "https://github.com/SergioBenitez/Rocket"
+default-features = false
+features = ["json"]

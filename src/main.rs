@@ -1,6 +1,8 @@
 mod structures;
 mod modules;
 mod helpers;
+mod webhooks;
+mod api;
 
 use std::{collections::HashMap, env, sync::Arc};
 use credentials_helper::Credentials;
@@ -82,20 +84,21 @@ async fn main() -> KingResult {
 
     let (user_config, channels) = get_info(&creds)?;
 
-    let mut pub_creds = HashMap::new();
-    pub_creds.insert("default prefix".to_owned(), creds.default_prefix);
-
     let runner = connect(&user_config, &channels).await?;
 
     let command_map = command_utils::register_commands();
 
     let pool = database_helper::obtain_db_pool(&creds.db_connection).await?;
     let prefixes = database_helper::fetch_prefixes(&pool).await?;
+    
+    let mut pub_creds = HashMap::new();
+    pub_creds.insert("default prefix".to_owned(), creds.default_prefix.clone());
 
     let bot = Bot {
         commands: command_map,
         writer: Arc::new(Mutex::new(runner.writer())),
-        data: Arc::new(RwLock::new(TypeMap::new()))
+        data: Arc::new(RwLock::new(TypeMap::new())),
+        channel: creds.channel.clone()
     };
 
     {
@@ -107,6 +110,12 @@ async fn main() -> KingResult {
         data.insert::<LurkTimes>(Arc::new(DashMap::new()));
         data.insert::<IntervalMap>(Arc::new(RwLock::new(Vec::new())));
     }
+
+    let bot_clone = bot.clone();
+
+    tokio::spawn(async move {
+        let _ = webhooks::rocket::start_rocket(bot_clone, creds.api_id, creds.api_token).await;
+    });
 
     main_loop(bot, runner).await
 }

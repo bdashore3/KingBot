@@ -37,7 +37,7 @@ pub async fn dispatch_interval(bot: &Bot, msg: &Privmsg<'_>, info: CommandInfo) 
     Ok(())
 }
 
-async fn start(bot: Bot, msg: Privmsg<'_>, info: CommandInfo) -> KingResult {
+pub async fn start(bot: Bot, msg: Privmsg<'_>, info: CommandInfo) -> KingResult {
     let mut writer = bot.writer.lock().await;
 
     let (pool, interval_lock) = {

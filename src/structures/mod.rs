@@ -1,4 +1,5 @@
 pub mod cmd_data;
+pub mod webhooks;
 
 use std::{collections::HashMap, sync::Arc};
 use futures::future::BoxFuture;
@@ -14,7 +15,8 @@ pub type CommandMap = HashMap<String, Command>;
 pub struct Bot {
     pub writer: Arc<Mutex<Writer>>,
     pub commands: CommandMap,
-    pub data: Arc<RwLock<TypeMap>>
+    pub data: Arc<RwLock<TypeMap>>,
+    pub channel: String
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
