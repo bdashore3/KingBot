@@ -15,8 +15,7 @@ pub type CommandMap = HashMap<String, Command>;
 pub struct Bot {
     pub writer: Arc<Mutex<Writer>>,
     pub commands: CommandMap,
-    pub data: Arc<RwLock<TypeMap>>,
-    pub channel: String
+    pub data: Arc<RwLock<TypeMap>>
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]

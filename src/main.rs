@@ -97,8 +97,7 @@ async fn main() -> KingResult {
     let bot = Bot {
         commands: command_map,
         writer: Arc::new(Mutex::new(runner.writer())),
-        data: Arc::new(RwLock::new(TypeMap::new())),
-        channel: creds.channel.clone()
+        data: Arc::new(RwLock::new(TypeMap::new()))
     };
 
     {
@@ -136,7 +135,7 @@ fn get_info(creds: &Credentials) -> KingResult<(twitchchat::UserConfig, Vec<Stri
 }
 
 async fn connect(user_config: &UserConfig, channels: &[String]) -> KingResult<AsyncRunner> {
-    let connector = Connector::twitch();
+    let connector = Connector::twitch()?;
 
     let mut runner = AsyncRunner::connect(connector, user_config).await?;
     println!("Connected to twitch!");
