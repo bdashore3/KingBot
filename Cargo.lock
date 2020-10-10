@@ -2036,9 +2036,9 @@ checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
 
 [[package]]
 name = "twitchchat"
-version = "0.13.3"
+version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81fca5949ec582f9d7dae1d56a134112d6f5ba0fc9272145b8bfb8056555cf42"
+checksum = "9e35281d9dc2d1c4efafb48ce45edc329717d0cb7b1fad7ea6f77d0580c227e3"
 dependencies = [
  "async-channel",
  "async-dup",

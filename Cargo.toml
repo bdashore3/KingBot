@@ -17,7 +17,7 @@ reqwest = { version = "0.10.8", features = ["json"] }
 
 
 [dependencies.twitchchat]
-version = "0.13.3"
+version = "0.14"
 features = ["async", "tokio", "tokio-util"]
 
 [dependencies.sqlx]

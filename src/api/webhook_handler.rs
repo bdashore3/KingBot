@@ -1,15 +1,21 @@
 use twitchchat::commands::privmsg;
 
-use crate::structures::{Bot, KingResult, webhooks::*};
+use crate::{modules::lurks::clear_lurks_internal, structures::{Bot, KingResult, webhooks::*}};
 
 pub async fn handle_stream(bot: &Bot, stream_data: Option<&StreamEvent>) -> KingResult {
     let mut writer = bot.writer.lock().await;
 
-    if stream_data.is_some() {
+    if let Some(data) = stream_data {
         let msg = format!("User went live!");
 
-        writer.encode(privmsg(&bot.channel, &msg)).await?;
+        let channel = format!("#{}", data.user_name);
+
+        writer.encode(privmsg(&channel, &msg)).await?;
     } else {
+        if let Err(e) = clear_lurks_internal(bot).await {
+            eprintln!("There was an error! {}", e);
+        }
+
         println!("User didn't go live!");
     }
 
@@ -21,7 +27,9 @@ pub async fn handle_follow(bot: &Bot, follow_data: &FollowEvent) -> KingResult {
 
     let msg =  format!("New follow from: {}", follow_data.from_name);
 
-    writer.encode(privmsg(&bot.channel, &msg)).await?;
+    let channel = format!("#{}", follow_data.to_name);
+
+    writer.encode(privmsg(&channel, &msg)).await?;
 
     Ok(())
 }

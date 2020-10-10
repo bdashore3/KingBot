@@ -72,17 +72,29 @@ pub async fn cancel_lurk(bot: &Bot, msg: &Privmsg<'_>) -> KingResult {
 
 pub async fn clear_lurks(bot: &Bot, msg: &Privmsg<'_>) -> KingResult {
     let mut writer = bot.writer.lock().await;
-    let lurk_map = bot.data.read().await
-        .get::<LurkTimes>().cloned().unwrap();
 
     if !msg.is_moderator() {
         writer.say(msg, "You can't access this command because you aren't a moderator!")?;
         return Ok(())
     }
 
-    lurk_map.clear();
+    match clear_lurks_internal(bot).await {
+        Ok(_) => {
+            writer.say(msg, "Lurks sucessfully cleared!")?;
+        },
+        Err(e) => {
+            writer.say(msg, &format!("Looks like there was an error! {}", e))?;
+        }
+    };
 
-    writer.say(msg, "Lurks sucessfully cleared!")?;
+    Ok(())
+}
+
+pub async fn clear_lurks_internal(bot: &Bot) -> KingResult {
+    let lurk_map = bot.data.read().await
+        .get::<LurkTimes>().cloned().unwrap();
+
+    lurk_map.clear();
 
     Ok(())
 }
