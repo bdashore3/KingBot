@@ -1,17 +1,5 @@
 {
   "db": "PostgreSQL",
-  "03f8534ccbd9a10eacda3082e75e51185de9a3c78753c6c5d58491f81034eba4": {
-    "query": "SELECT FROM messages WHERE channel_name = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "1ff28225cf71331fbf8fce2ea0ae2e06e20068413874bb454de7bf4603fdcbc1": {
     "query": "INSERT INTO quotes VALUES ($1, $2, $3)",
     "describe": {
@@ -183,19 +171,6 @@
         false,
         false
       ]
-    }
-  },
-  "8609e731bc54412211e63d5e7495b710f66ba412887e0b810f85c3af237331bb": {
-    "query": "INSERT INTO messages VALUES($1, $2)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "97533973ea1dc6d60fd3b9226c6f025748da24a4666f5b9ff494919f4fee1977": {
