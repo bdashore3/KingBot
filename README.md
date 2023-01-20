@@ -109,5 +109,3 @@ Creator/Developer: Brian Dashore
 Developer Discord: kingbri#6666
 
 Follow me on twitch (I stream bot creation along with games): [https://twitch.tv/kingbrigames](https://twitch.tv/kingbrigames)
-
-Join the Discord server here: [https://discord.gg/pswt7by](https://discord.gg/pswt7by)
